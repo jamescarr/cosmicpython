@@ -1,8 +1,15 @@
-test:
-	poetry run pytest --tb=short
 
-watch-tests:
-	ls *.py | entr poetry run pytest --tb=short
+# Make "help" the default target
+.DEFAULT_GOAL := help
 
-black:
+help:  ## Show this help message
+	@grep -E '^[a-zA-Z_-]+:.*##' Makefile | awk 'BEGIN {FS = ":.*##"}; { printf "\033[36m%-20s\033[0m %s\n", $$1, $$2 }'
+
+test:  ## Run the tests using Poetry and pytest
+	poetry run pytest
+
+watch-tests:  ## Run tests continuously using pytest-watch
+	poetry run pytest-watch
+
+black:  ## Run black on the project
 	black -l 86 $$(find * -name '*.py')
