@@ -21,6 +21,9 @@ class SQLAlchemyRepository(AbstractRepository):
     def get(self, reference) -> Batch:
         return self._session.query(Batch).filter_by(reference=reference).one()
 
+    def list(self):
+        return self._session.query(Batch).all()
+
 
 class FakeRepository(AbstractRepository):
     def __init__(self, batches):

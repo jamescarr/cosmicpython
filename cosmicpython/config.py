@@ -1,5 +1,7 @@
 import os
 from dataclasses import dataclass
+from sqlalchemy import create_engine
+from cosmicpython.orm import sessionmaker, start_mappers
 
 @dataclass(frozen=True)
 class ServerDetails:
@@ -24,3 +26,7 @@ def get_api_url() -> ServerDetails:
     port = os.environ.get("API_PORT", "8001")
     return ServerDetails(host=host, port=port)
 
+
+def init_db():
+    start_mappers()
+    return sessionmaker(bind=create_engine(get_postgres_uri()))
