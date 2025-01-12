@@ -117,3 +117,6 @@ dmypy.json
 
 # macOS
 .DS_Store
+.testmondata
+.testmondata-shm
+.testmondata-wal
