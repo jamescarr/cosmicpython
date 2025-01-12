@@ -12,4 +12,7 @@ watch-tests:  ## Run tests continuously using pytest-watch
 	poetry run ptw .
 
 black:  ## Run black on the project
-	black -l 86 $$(find * -name '*.py')
+	poetry run black -l 86 $$(find * -name '*.py')
+
+api-dev:  ## Runs the API Server
+	poetry run fastapi dev cosmicpython/api.py
