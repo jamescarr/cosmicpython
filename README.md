@@ -10,4 +10,7 @@ book. Each chapter has its own branch for pursual.
   - Status: *DONE*
   - Git tag: [ch01](https://github.com/jamescarr/cosmicpython/tree/ch01)
 
+- **[Chapter 2: Repository Pattern](https://www.cosmicpython.com/book/chapter_02_repository.html)
+  - Status: *IN PROGRESS*
+  - Git tag: [ch02](https://github.com/jamescarr/cosmicpython/tree/ch02)
 
