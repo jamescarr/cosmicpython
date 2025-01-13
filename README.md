@@ -19,5 +19,18 @@ book. Each chapter has its own branch for pursual.
   - Git tag: [ch04](https://github.com/jamescarr/cosmicpython/tree/ch04)
 
 
+## Development
+There is a `Makefile` included with the targets listed when running the default
+help target.
 
+```
+help                  Show this help message
+test                  Run the tests using Poetry and pytest
+watch-tests           Run tests continuously using pytest-watch
+black                 Run black on the project
+api-dev               Runs the API Server
+```
 
+## API Server
+The API server can be run standalone via `make api-dev` and contains a SwaggerUI
+endpoint at `/docs`.

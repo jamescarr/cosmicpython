@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from cosmicpython.repository import SQLAlchemyRepository
 from cosmicpython import config, models, services
 
-app = FastAPI()
+app = FastAPI(swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"})
 
 
 get_session = config.init_db()
@@ -28,7 +28,7 @@ def allocate(request: AllocationRequest, response: Response):
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": str(e)}
 
-
+## /deallocate
 
 @app.get("/")
 def read_root():
