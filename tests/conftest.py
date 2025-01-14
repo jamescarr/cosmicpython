@@ -22,6 +22,7 @@ def in_memory_db():
 def session(in_memory_db):
     config.start_mappers()
     yield sessionmaker(bind=in_memory_db)()
+    clear_mappers()
 
 
 @pytest.fixture(scope="session")

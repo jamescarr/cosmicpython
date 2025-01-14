@@ -1,5 +1,6 @@
 import abc
-from cosmicpython.models import Batch
+from typing import Optional
+from cosmicpython.models import Batch, OrderLine
 
 class AbstractRepository(abc.ABC):
     @abc.abstractmethod
@@ -12,6 +13,10 @@ class AbstractRepository(abc.ABC):
 
     @abc.abstractmethod
     def list(self) -> list[Batch]:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def find_containing_line(self, line: OrderLine) -> Optional[Batch]:
         raise NotImplementedError
 
 class SQLAlchemyRepository(AbstractRepository):
@@ -28,6 +33,18 @@ class SQLAlchemyRepository(AbstractRepository):
     def list(self) -> list[Batch]:
         return self._session.query(Batch).all()
 
+    def find_containing_line(self, line: OrderLine) -> Batch:
+        batch = (
+            self._session.query(Batch)
+            .join(Batch._allocations)
+            .filter(
+                OrderLine.orderid == line.orderid,
+            )
+            .one_or_none()
+        )
+        if batch:
+            return batch
+        raise Exception("No batch found")
 
 class FakeRepository(AbstractRepository):
     def __init__(self, batches):
@@ -39,5 +56,13 @@ class FakeRepository(AbstractRepository):
     def get(self, reference):
         return next(b for b in self._batches if b.reference == reference)
 
+
     def list(self) -> list[Batch]:
         return list(self._batches)
+
+
+    def find_containing_line(self, line: OrderLine) -> Optional[Batch]:
+        for batch in self._batches:
+            if batch.contains(line):
+                return batch
+        return None
