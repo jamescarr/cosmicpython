@@ -44,7 +44,13 @@ class SQLAlchemyRepository(AbstractRepository):
         )
         if batch:
             return batch
-        raise Exception("No batch found")
+        raise NoBatchContainingOrderLine(line)
+
+class NoBatchContainingOrderLine(Exception):
+    def __init__(self, line: OrderLine):
+        super().__init__(f"No batch containing order {line.orderid}")
+        self.line = line
+
 
 class FakeRepository(AbstractRepository):
     def __init__(self, batches):
