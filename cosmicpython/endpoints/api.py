@@ -1,8 +1,10 @@
 from fastapi import FastAPI, Response, status
 from pydantic import BaseModel
 from starlette.status import HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
-from cosmicpython.repository import NoBatchContainingOrderLine, SQLAlchemyRepository
-from cosmicpython import config, models, services
+from cosmicpython.adapters.repository import NoBatchContainingOrderLine, SQLAlchemyRepository
+from cosmicpython import config
+from cosmicpython.domain import models
+from cosmicpython.service_layer import services
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"})
 

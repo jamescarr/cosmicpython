@@ -1,7 +1,6 @@
 import abc
 from typing import Optional
-from weakref import ref
-from cosmicpython.models import Batch, OrderLine
+from cosmicpython.domain.models import Batch, OrderLine
 
 class AbstractRepository(abc.ABC):
     @abc.abstractmethod

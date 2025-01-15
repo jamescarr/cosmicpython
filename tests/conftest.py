@@ -2,14 +2,16 @@ import pytest
 
 from sqlalchemy import create_engine
 from cosmicpython import config
-from cosmicpython.orm import mapper_registry, sessionmaker, clear_mappers, metadata
-from cosmicpython.repository import AbstractRepository, SQLAlchemyRepository
+from cosmicpython.adapters.orm import mapper_registry, sessionmaker, clear_mappers, metadata
+from cosmicpython.adapters.repository import AbstractRepository, SQLAlchemyRepository
 import pytest
 import subprocess
 import time
 
 from sqlalchemy.exc import OperationalError
 from sqlalchemy import text
+
+ENTRYPOINT = "cosmicpython.endpoints.api:app"
 
 @pytest.fixture
 def in_memory_db():
@@ -48,7 +50,7 @@ def restart_api():
     server_details = config.get_api_url()
 
     # Start the FastAPI server on some port, e.g. 8001
-    proc = subprocess.Popen(["uvicorn", "cosmicpython.api:app", "--port", server_details.port],
+    proc = subprocess.Popen(["uvicorn", ENTRYPOINT, "--port", server_details.port],
                             stdout=subprocess.PIPE)
 
     # Optionally give it a moment to spin up

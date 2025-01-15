@@ -1,6 +1,6 @@
-from cosmicpython.models import OrderLine, OutOfStock
-from cosmicpython import models
-from cosmicpython.repository import AbstractRepository
+from cosmicpython.domain.models import OrderLine, OutOfStock
+from cosmicpython.domain import models
+from cosmicpython.adapters.repository import AbstractRepository
 
 
 def is_valid_sku(sku, batches):

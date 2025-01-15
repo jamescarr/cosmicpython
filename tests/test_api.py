@@ -2,8 +2,8 @@ import pytest
 import requests
 
 from cosmicpython import config
-from cosmicpython.models import OrderLine
-from cosmicpython.repository import AbstractRepository
+from cosmicpython.domain.models import OrderLine
+from cosmicpython.adapters.repository import AbstractRepository
 from .test_utils import random_sku, random_batchref, random_orderid
 
 

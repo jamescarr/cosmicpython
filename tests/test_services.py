@@ -1,6 +1,7 @@
 import pytest
-from cosmicpython import models, services
-from cosmicpython.repository import FakeRepository
+from cosmicpython.domain import models
+from cosmicpython.service_layer import services
+from cosmicpython.adapters.repository import FakeRepository
 
 class FakeSession:
     committed = False

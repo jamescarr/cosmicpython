@@ -2,7 +2,7 @@ from sqlalchemy import Table, Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import registry, sessionmaker, clear_mappers, relationship
 
 
-from cosmicpython import models
+from cosmicpython.domain import models
 
 mapper_registry = registry()
 metadata = mapper_registry.metadata

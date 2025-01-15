@@ -1,5 +1,5 @@
 import pytest
-from cosmicpython.models import Batch, OrderLine, allocate, OutOfStock
+from cosmicpython.domain.models import Batch, OrderLine, allocate, OutOfStock
 from datetime import date, timedelta
 from random import randint
 
