@@ -23,7 +23,7 @@ def test_api_returns_allocation(add_stock):
     data = {"orderid": random_orderid(), "sku": sku, "qty": 3}
     url = config.get_api_url().url
 
-    r = requests.post(f"{url}/allocate", json=data)
+    r = requests.post(f"{url}/allocations", json=data)
 
     assert r.status_code == 201
     print(r.content)
@@ -43,17 +43,17 @@ def test_allocations_are_persisted(add_stock):
     url = config.get_api_url().url
 
     # first order uses up all stock in batch 1
-    r = requests.post(f"{url}/allocate", json=line1)
+    r = requests.post(f"{url}/allocations", json=line1)
     assert r.status_code == 201
     assert r.json()["batchref"] == batch1
 
     # second order should go to batch 2
-    r = requests.post(f"{url}/allocate", json=line2)
+    r = requests.post(f"{url}/allocations", json=line2)
     assert r.status_code == 201
     assert r.json()["batchref"] == batch2
 
 @pytest.mark.usefixtures("restart_api")
-def test_allocations_can_be_deallocated(add_stock):
+def test_allocations_can_be_allocationsd(add_stock):
     sku = random_sku()
     batch1, batch2 = random_batchref("1"), random_batchref("2")
     order1 = random_orderid("1")
@@ -65,8 +65,8 @@ def test_allocations_can_be_deallocated(add_stock):
     url = config.get_api_url().url
 
     # first order uses up all stock in batch 1
-    requests.post(f"{url}/allocate", json=line1)
-    r = requests.delete(f"{url}/deallocate", json=line1)
+    requests.post(f"{url}/allocations", json=line1)
+    r = requests.delete(f"{url}/allocations", json=line1)
     assert r.status_code == 204
 
     batch = repository.get(batch1)
@@ -75,7 +75,7 @@ def test_allocations_can_be_deallocated(add_stock):
 
 
 @pytest.mark.usefixtures("restart_api")
-def test_404_message_for_no_order_to_deallocate(add_stock):
+def test_404_message_for_no_order_to_allocations(add_stock):
     sku = random_sku()
     batch1, batch2 = random_batchref("1"), random_batchref("2")
     order1 = random_orderid("1")
@@ -86,7 +86,7 @@ def test_404_message_for_no_order_to_deallocate(add_stock):
     line1 = {"orderid": order1, "sku": sku, "qty": 10}
     url = config.get_api_url().url
 
-    r = requests.delete(f"{url}/deallocate", json=line1)
+    r = requests.delete(f"{url}/allocations", json=line1)
     assert r.status_code == 404
     assert r.json()["message"] == f"No batch containing order {order1}"
 
@@ -98,7 +98,7 @@ def test_400_message_for_out_of_stock(add_stock):  #(1)
     )
     data = {"orderid": large_order, "sku": sku, "qty": 20}
     url = config.get_api_url().url
-    r = requests.post(f"{url}/allocate", json=data)
+    r = requests.post(f"{url}/allocations", json=data)
     assert r.status_code == 400
     assert r.json()["message"] == f"Out of stock: {sku}"
 
@@ -108,7 +108,7 @@ def test_400_message_for_invalid_sku():  #(2)
     unknown_sku, orderid = random_sku(), random_orderid()
     data = {"orderid": orderid, "sku": unknown_sku, "qty": 20}
     url = config.get_api_url().url
-    r = requests.post(f"{url}/allocate", json=data)
+    r = requests.post(f"{url}/allocations", json=data)
 
     assert r.json()["message"] == f"Invalid sku {unknown_sku}"
     assert r.status_code == 400

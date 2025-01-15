@@ -19,7 +19,7 @@ def order_line_from_request(req: AllocationRequest):
         req.orderid, req.sku, req.qty
     )
 
-@app.post("/allocate")
+@app.post("/allocations")
 def allocate(request: AllocationRequest, response: Response):
     line = order_line_from_request(request)
     session = get_session()
@@ -33,7 +33,7 @@ def allocate(request: AllocationRequest, response: Response):
         return {"message": str(e)}
 
 
-@app.delete("/deallocate")
+@app.delete("/allocations")
 def deallocate(request: AllocationRequest, response: Response):
     line = order_line_from_request(request)
     session = get_session()
