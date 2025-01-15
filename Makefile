@@ -6,13 +6,19 @@ help:  ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*##' Makefile | awk 'BEGIN {FS = ":.*##"}; { printf "\033[36m%-20s\033[0m %s\n", $$1, $$2 }'
 
 test:  ## Run the tests using Poetry and pytest
-	poetry run pytest
+	uv run pytest
 
 watch-tests:  ## Run tests continuously using pytest-watch
-	poetry run ptw .
+	uv run ptw .
 
 black:  ## Run black on the project
-	poetry run black -l 86 $$(find * -name '*.py')
+	uv run black -l 86 $$(find * -name '*.py')
 
-api-dev:  ## Runs the API Server
-	poetry run fastapi dev cosmicpython/api.py
+api-dev: install ## Runs the API Server
+	uv run fastapi dev cosmicpython/endpoints/api.py
+
+clean:  ## Wipe out venv, docker, etc.
+	rm -rf .venv
+
+install:  ## install dependencies
+	uv pip install -r pyproject.toml
