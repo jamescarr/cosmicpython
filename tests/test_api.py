@@ -76,7 +76,19 @@ def test_allocations_can_be_deallocated(add_stock):
 
 @pytest.mark.usefixtures("restart_api")
 def test_404_message_for_no_order_to_deallocate(add_stock):
-    ... # Should throw 404 if trying to deallocate an order not assigned to a batch
+    sku = random_sku()
+    batch1, batch2 = random_batchref("1"), random_batchref("2")
+    order1 = random_orderid("1")
+
+    repository = add_stock(
+        [(batch1, sku, 10, "2011-01-01"), (batch2, sku, 10, "2011-01-02"),]
+    )
+    line1 = {"orderid": order1, "sku": sku, "qty": 10}
+    url = config.get_api_url().url
+
+    r = requests.delete(f"{url}/deallocate", json=line1)
+    assert r.status_code == 404
+    assert r.json()["message"] == f"No batch containing order {order1}"
 
 @pytest.mark.usefixtures("restart_api")
 def test_400_message_for_out_of_stock(add_stock):  #(1)

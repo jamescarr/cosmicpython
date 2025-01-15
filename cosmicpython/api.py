@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Response, status
 from pydantic import BaseModel
-from starlette.status import HTTP_204_NO_CONTENT
-from cosmicpython.repository import SQLAlchemyRepository
+from starlette.status import HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
+from cosmicpython.repository import NoBatchContainingOrderLine, SQLAlchemyRepository
 from cosmicpython import config, models, services
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"})
@@ -39,9 +39,13 @@ def deallocate(request: AllocationRequest, response: Response):
     session = get_session()
     batches = SQLAlchemyRepository(session)
 
-    services.deallocate(line, batches, session)
-    response.status_code = HTTP_204_NO_CONTENT
-    return {"message": "deleted"}
+    try:
+        services.deallocate(line, batches, session)
+        response.status_code = HTTP_204_NO_CONTENT
+        return {"message": "deleted"}
+    except NoBatchContainingOrderLine as e:
+        response.status_code = HTTP_404_NOT_FOUND
+        return {"message": str(e)}
 
 @app.get("/")
 def read_root():
