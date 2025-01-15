@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Response, status
 from pydantic import BaseModel
+from starlette.status import HTTP_204_NO_CONTENT
 from cosmicpython.repository import SQLAlchemyRepository
 from cosmicpython import config, models, services
 
@@ -13,11 +14,14 @@ class AllocationRequest(BaseModel):
     sku: str
     qty: int
 
+def order_line_from_request(req: AllocationRequest):
+    return models.OrderLine(
+        req.orderid, req.sku, req.qty
+    )
+
 @app.post("/allocate")
 def allocate(request: AllocationRequest, response: Response):
-    line = models.OrderLine(
-        request.orderid, request.sku, request.qty
-    )
+    line = order_line_from_request(request)
     session = get_session()
     batches = SQLAlchemyRepository(session)
     try:
@@ -28,8 +32,11 @@ def allocate(request: AllocationRequest, response: Response):
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": str(e)}
 
-## /deallocate
 
+@app.delete("/deallocate")
+def deallocate(request: AllocationRequest, response: Response):
+        response.status_code = HTTP_204_NO_CONTENT
+        return {"message": "deleted"}
 @app.get("/")
 def read_root():
     return {"Hello": "World"}

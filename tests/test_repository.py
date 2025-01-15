@@ -1,4 +1,5 @@
 from sqlalchemy import text
+import pytest
 
 from cosmicpython import models, repository
 
@@ -61,4 +62,9 @@ def test_fetch_batch_by_order_line(session):
 
     assert batch.reference == "batch1"
 
+def test_behavior_when_batch_not_found(session):
+    repo = repository.SQLAlchemyRepository(session)
+    line = models.OrderLine("order256", "GENERIC-SOFA", 100)
 
+    with pytest.raises(repository.NoBatchContainingOrderLine):
+        repo.find_containing_line(line)

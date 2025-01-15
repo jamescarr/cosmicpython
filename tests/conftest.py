@@ -3,6 +3,7 @@ import pytest
 from sqlalchemy import create_engine
 from cosmicpython import config
 from cosmicpython.orm import mapper_registry, sessionmaker, clear_mappers, metadata
+from cosmicpython.repository import AbstractRepository, SQLAlchemyRepository
 import pytest
 import subprocess
 import time
@@ -14,7 +15,7 @@ from sqlalchemy import text
 @pytest.fixture
 def in_memory_db():
     engine = create_engine("sqlite:///:memory:")
-    mapper_registry.metadata.create_all(engine)
+    metadata.create_all(engine)
     return engine
 
 
@@ -24,6 +25,20 @@ def session(in_memory_db):
     yield sessionmaker(bind=in_memory_db)()
     clear_mappers()
 
+
+@pytest.fixture(scope="session")
+def postgres_db():
+    engine = create_engine(config.get_postgres_uri())
+    wait_for_postgres_to_come_up(engine)
+    metadata.create_all(engine)
+    return engine
+
+
+@pytest.fixture
+def postgres_session(postgres_db):
+    config.start_mappers()
+    yield sessionmaker(bind=postgres_db)()
+    clear_mappers()
 
 @pytest.fixture(scope="session")
 def restart_api():
@@ -48,18 +63,6 @@ def restart_api():
     proc.wait(timeout=5)
 
 
-@pytest.fixture(scope="session")
-def postgres_db():
-    engine = create_engine(config.get_postgres_uri())
-    wait_for_postgres_to_come_up(engine)
-    metadata.create_all(engine)
-    return engine
-
-
-@pytest.fixture
-def postgres_session(postgres_db):
-    yield sessionmaker(bind=postgres_db)()
-
 
 @pytest.fixture
 def add_stock(postgres_session):
@@ -80,6 +83,8 @@ def add_stock(postgres_session):
             batches_added.add(batch_id)
             skus_added.add(sku)
         postgres_session.commit()
+        return SQLAlchemyRepository(postgres_session)
+
 
     yield _add_stock
 

@@ -1,5 +1,6 @@
 import abc
 from typing import Optional
+from weakref import ref
 from cosmicpython.models import Batch, OrderLine
 
 class AbstractRepository(abc.ABC):
@@ -28,7 +29,7 @@ class SQLAlchemyRepository(AbstractRepository):
         self._session.add(batch)
 
     def get(self, reference) -> Batch:
-        return self._session.query(Batch).filter_by(reference=reference).one()
+        return self._session.query(Batch).filter_by(reference=reference).first()
 
     def list(self) -> list[Batch]:
         return self._session.query(Batch).all()
@@ -40,7 +41,7 @@ class SQLAlchemyRepository(AbstractRepository):
             .filter(
                 OrderLine.orderid == line.orderid,
             )
-            .one_or_none()
+            .first()
         )
         if batch:
             return batch
