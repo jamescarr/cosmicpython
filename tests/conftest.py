@@ -8,7 +8,6 @@ import pytest
 import subprocess
 import time
 
-from requests.exceptions import ConnectionError
 from sqlalchemy.exc import OperationalError
 from sqlalchemy import text
 

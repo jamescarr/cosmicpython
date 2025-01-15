@@ -35,8 +35,14 @@ def allocate(request: AllocationRequest, response: Response):
 
 @app.delete("/deallocate")
 def deallocate(request: AllocationRequest, response: Response):
-        response.status_code = HTTP_204_NO_CONTENT
-        return {"message": "deleted"}
+    line = order_line_from_request(request)
+    session = get_session()
+    batches = SQLAlchemyRepository(session)
+
+    services.deallocate(line, batches, session)
+    response.status_code = HTTP_204_NO_CONTENT
+    return {"message": "deleted"}
+
 @app.get("/")
 def read_root():
     return {"Hello": "World"}

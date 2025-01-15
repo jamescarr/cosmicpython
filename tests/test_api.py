@@ -74,6 +74,9 @@ def test_allocations_can_be_deallocated(add_stock):
     assert not batch.contains(OrderLine(orderid=order1, sku=sku, qty=10))
 
 
+@pytest.mark.usefixtures("restart_api")
+def test_404_message_for_no_order_to_deallocate(add_stock):
+    ... # Should throw 404 if trying to deallocate an order not assigned to a batch
 
 @pytest.mark.usefixtures("restart_api")
 def test_400_message_for_out_of_stock(add_stock):  #(1)
