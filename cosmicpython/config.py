@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from sqlalchemy import create_engine
 from cosmicpython.adapters.orm import sessionmaker, start_mappers
 
+
 @dataclass(frozen=True)
 class ServerDetails:
     host: str
@@ -12,6 +13,7 @@ class ServerDetails:
     def url(self):
         return f"http://{self.host}:{self.port}"
 
+
 def get_postgres_uri() -> str:
     user = os.environ.get("DB_USER")
     password = os.environ.get("DB_PASSWORD")
@@ -20,6 +22,7 @@ def get_postgres_uri() -> str:
     dbname = os.environ.get("DB_DATABASE")
 
     return f"postgresql://{user}:{password}@{host}:{port}/{dbname}"
+
 
 def get_api_url() -> ServerDetails:
     host = os.environ.get("API_HOST", "localhost")

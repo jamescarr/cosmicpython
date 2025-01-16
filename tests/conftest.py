@@ -2,7 +2,12 @@ import pytest
 
 from sqlalchemy import create_engine
 from cosmicpython import config
-from cosmicpython.adapters.orm import mapper_registry, sessionmaker, clear_mappers, metadata
+from cosmicpython.adapters.orm import (
+    mapper_registry,
+    sessionmaker,
+    clear_mappers,
+    metadata,
+)
 from cosmicpython.adapters.repository import AbstractRepository, SQLAlchemyRepository
 import pytest
 import subprocess
@@ -12,6 +17,7 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy import text
 
 ENTRYPOINT = "cosmicpython.endpoints.api:app"
+
 
 @pytest.fixture
 def in_memory_db():
@@ -41,6 +47,7 @@ def postgres_session(postgres_db):
     yield sessionmaker(bind=postgres_db)()
     clear_mappers()
 
+
 @pytest.fixture(scope="session")
 def restart_api():
     """
@@ -50,8 +57,9 @@ def restart_api():
     server_details = config.get_api_url()
 
     # Start the FastAPI server on some port, e.g. 8001
-    proc = subprocess.Popen(["uvicorn", ENTRYPOINT, "--port", server_details.port],
-                            stdout=subprocess.PIPE)
+    proc = subprocess.Popen(
+        ["uvicorn", ENTRYPOINT, "--port", server_details.port], stdout=subprocess.PIPE
+    )
 
     # Optionally give it a moment to spin up
     time.sleep(1)
@@ -64,7 +72,6 @@ def restart_api():
     proc.wait(timeout=5)
 
 
-
 @pytest.fixture
 def add_stock(postgres_session):
     batches_added = set()
@@ -72,20 +79,21 @@ def add_stock(postgres_session):
 
     def _add_stock(lines):
         for ref, sku, qty, eta in lines:
-            postgres_session.execute(text(
-                "INSERT INTO batches (reference, sku, _purchased_quantity, eta)"
-                " VALUES (:ref, :sku, :qty, :eta)"),
+            postgres_session.execute(
+                text(
+                    "INSERT INTO batches (reference, sku, _purchased_quantity, eta)"
+                    " VALUES (:ref, :sku, :qty, :eta)"
+                ),
                 dict(ref=ref, sku=sku, qty=qty, eta=eta),
             )
-            [[batch_id]] = postgres_session.execute(text(
-                "SELECT id FROM batches WHERE reference=:ref AND sku=:sku"),
+            [[batch_id]] = postgres_session.execute(
+                text("SELECT id FROM batches WHERE reference=:ref AND sku=:sku"),
                 dict(ref=ref, sku=sku),
             )
             batches_added.add(batch_id)
             skus_added.add(sku)
         postgres_session.commit()
         return SQLAlchemyRepository(postgres_session)
-
 
     yield _add_stock
 
@@ -95,13 +103,16 @@ def add_stock(postgres_session):
             dict(batch_id=batch_id),
         )
         postgres_session.execute(
-            text("DELETE FROM batches WHERE id=:batch_id"), dict(batch_id=batch_id),
+            text("DELETE FROM batches WHERE id=:batch_id"),
+            dict(batch_id=batch_id),
         )
     for sku in skus_added:
         postgres_session.execute(
-            text("DELETE FROM order_lines WHERE sku=:sku"), dict(sku=sku),
+            text("DELETE FROM order_lines WHERE sku=:sku"),
+            dict(sku=sku),
         )
         postgres_session.commit()
+
 
 def wait_for_postgres_to_come_up(engine):
     deadline = time.time() + 10

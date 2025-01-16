@@ -7,11 +7,9 @@ from cosmicpython.domain import models
 mapper_registry = registry()
 metadata = mapper_registry.metadata
 
+
 def create_mapping(model, table_definition, **kwargs):
-    mapper_registry.map_imperatively(
-        model,
-        table_definition,
-        **kwargs)
+    mapper_registry.map_imperatively(model, table_definition, **kwargs)
 
 
 order_lines = Table(
@@ -22,7 +20,6 @@ order_lines = Table(
     Column("qty", Integer, nullable=False),
     Column("orderid", String(255)),
 )
-
 
 
 batches = Table(
@@ -43,6 +40,7 @@ allocations = Table(
     Column("batch_id", ForeignKey("batches.id")),
 )
 
+
 def start_mappers():
     lines_mapper = create_mapping(models.OrderLine, order_lines)
     create_mapping(
@@ -50,9 +48,10 @@ def start_mappers():
         batches,
         properties={
             "_allocations": relationship(
-                models.OrderLine, backref="batch", secondary=allocations, collection_class=set,
+                models.OrderLine,
+                backref="batch",
+                secondary=allocations,
+                collection_class=set,
             )
         },
     )
-
-

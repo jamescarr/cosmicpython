@@ -9,11 +9,11 @@ from .test_utils import random_sku, random_batchref, random_orderid
 
 @pytest.mark.usefixtures("restart_api")
 def test_api_returns_allocation(add_stock):
-    sku, othersku = random_sku(), random_sku("other")  #(1)
+    sku, othersku = random_sku(), random_sku("other")  # (1)
     earlybatch = random_batchref("1")
     laterbatch = random_batchref("2")
     otherbatch = random_batchref("3")
-    add_stock(  #(2)
+    add_stock(  # (2)
         [
             (laterbatch, sku, 100, "2011-01-02"),
             (earlybatch, sku, 100, "2011-01-01"),
@@ -30,13 +30,17 @@ def test_api_returns_allocation(add_stock):
 
     assert r.json()["batchref"] == earlybatch
 
+
 @pytest.mark.usefixtures("restart_api")
 def test_allocations_are_persisted(add_stock):
     sku = random_sku()
     batch1, batch2 = random_batchref("1"), random_batchref("2")
     order1, order2 = random_orderid("1"), random_orderid("2")
     add_stock(
-        [(batch1, sku, 10, "2011-01-01"), (batch2, sku, 10, "2011-01-02"),]
+        [
+            (batch1, sku, 10, "2011-01-01"),
+            (batch2, sku, 10, "2011-01-02"),
+        ]
     )
     line1 = {"orderid": order1, "sku": sku, "qty": 10}
     line2 = {"orderid": order2, "sku": sku, "qty": 10}
@@ -52,6 +56,7 @@ def test_allocations_are_persisted(add_stock):
     assert r.status_code == 201
     assert r.json()["batchref"] == batch2
 
+
 @pytest.mark.usefixtures("restart_api")
 def test_allocations_can_be_allocationsd(add_stock):
     sku = random_sku()
@@ -59,7 +64,10 @@ def test_allocations_can_be_allocationsd(add_stock):
     order1 = random_orderid("1")
 
     repository = add_stock(
-        [(batch1, sku, 10, "2011-01-01"), (batch2, sku, 10, "2011-01-02"),]
+        [
+            (batch1, sku, 10, "2011-01-01"),
+            (batch2, sku, 10, "2011-01-02"),
+        ]
     )
     line1 = {"orderid": order1, "sku": sku, "qty": 10}
     url = config.get_api_url().url
@@ -81,7 +89,10 @@ def test_404_message_for_no_order_to_allocations(add_stock):
     order1 = random_orderid("1")
 
     repository = add_stock(
-        [(batch1, sku, 10, "2011-01-01"), (batch2, sku, 10, "2011-01-02"),]
+        [
+            (batch1, sku, 10, "2011-01-01"),
+            (batch2, sku, 10, "2011-01-02"),
+        ]
     )
     line1 = {"orderid": order1, "sku": sku, "qty": 10}
     url = config.get_api_url().url
@@ -90,11 +101,14 @@ def test_404_message_for_no_order_to_allocations(add_stock):
     assert r.status_code == 404
     assert r.json()["message"] == f"No batch containing order {order1}"
 
+
 @pytest.mark.usefixtures("restart_api")
-def test_400_message_for_out_of_stock(add_stock):  #(1)
+def test_400_message_for_out_of_stock(add_stock):  # (1)
     sku, small_batch, large_order = random_sku(), random_batchref(), random_orderid()
     add_stock(
-        [(small_batch, sku, 10, "2011-01-01"),]
+        [
+            (small_batch, sku, 10, "2011-01-01"),
+        ]
     )
     data = {"orderid": large_order, "sku": sku, "qty": 20}
     url = config.get_api_url().url
@@ -104,7 +118,7 @@ def test_400_message_for_out_of_stock(add_stock):  #(1)
 
 
 @pytest.mark.usefixtures("restart_api")
-def test_400_message_for_invalid_sku():  #(2)
+def test_400_message_for_invalid_sku():  # (2)
     unknown_sku, orderid = random_sku(), random_orderid()
     data = {"orderid": orderid, "sku": unknown_sku, "qty": 20}
     url = config.get_api_url().url

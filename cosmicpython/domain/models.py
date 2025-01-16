@@ -1,11 +1,12 @@
-
 from dataclasses import dataclass
+
 
 @dataclass(unsafe_hash=True)
 class OrderLine:
     orderid: str
     sku: str
     qty: int
+
 
 class Batch:
     def __init__(self, reference, sku, qty, eta) -> None:
@@ -14,7 +15,6 @@ class Batch:
         self.eta = eta
         self._purchased_quantity = qty
         self._allocations = set()
-
 
     def allocate(self, orderline: OrderLine) -> None:
         if self.can_allocate(orderline):
@@ -39,9 +39,12 @@ class Batch:
         return line.sku == self.sku and self.available_quantity >= line.qty
 
     def __gt__(self, other) -> bool:
-        if self.eta is None: return False
-        if other.eta is None: return True
+        if self.eta is None:
+            return False
+        if other.eta is None:
+            return True
         return self.eta > other.eta
+
 
 def allocate(line: OrderLine, batches: list) -> str:
     try:
@@ -51,8 +54,8 @@ def allocate(line: OrderLine, batches: list) -> str:
     except StopIteration:
         raise OutOfStock(line)
 
+
 class OutOfStock(Exception):
     def __init__(self, line):
         super().__init__(f"Out of stock: {line.sku}")
         self.line = line
-

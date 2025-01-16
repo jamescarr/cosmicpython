@@ -3,6 +3,7 @@ from cosmicpython.domain import models
 from cosmicpython.service_layer import services
 from cosmicpython.adapters.repository import FakeRepository
 
+
 class FakeSession:
     committed = False
 
@@ -13,19 +14,19 @@ class FakeSession:
 def test_returns_allocation():
     line = models.OrderLine("o1", "COMPLICATED-LAMP", 10)
     batch = models.Batch("b1", "COMPLICATED-LAMP", 100, eta=None)
-    repo = FakeRepository([batch])  #(1)
+    repo = FakeRepository([batch])  # (1)
 
-    result = services.allocate(line, repo, FakeSession())  #(2) (3)
+    result = services.allocate(line, repo, FakeSession())  # (2) (3)
     assert result == "b1"
 
 
 def test_error_for_invalid_sku():
     line = models.OrderLine("o1", "NONEXISTENTSKU", 10)
     batch = models.Batch("b1", "AREALSKU", 100, eta=None)
-    repo = FakeRepository([batch])  #(1)
+    repo = FakeRepository([batch])  # (1)
 
     with pytest.raises(services.InvalidSku, match="Invalid sku NONEXISTENTSKU"):
-        services.allocate(line, repo, FakeSession())  #(2) (3)
+        services.allocate(line, repo, FakeSession())  # (2) (3)
 
 
 def test_commits():
@@ -36,6 +37,7 @@ def test_commits():
 
     services.allocate(line, repo, session)
     assert session.committed is True
+
 
 def test_deallocate_decrements_available_quantity():
     repo, session = FakeRepository([]), FakeSession()
@@ -51,9 +53,7 @@ def test_deallocate_decrements_available_quantity():
     assert batch.available_quantity == 100
 
 
-def test_deallocate_decrements_correct_quantity():
-    ...  #  TODO - check that we decrement the right sku
+def test_deallocate_decrements_correct_quantity(): ...  #  TODO - check that we decrement the right sku
 
 
-def test_trying_to_deallocate_unallocated_batch():
-    ...  #  TODO: should this error or pass silently? up to you.
+def test_trying_to_deallocate_unallocated_batch(): ...  #  TODO: should this error or pass silently? up to you.
