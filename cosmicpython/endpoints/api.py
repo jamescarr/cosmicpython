@@ -27,11 +27,12 @@ def order_line_from_request(req: AllocationRequest):
 
 @app.post("/allocations")
 def allocate(request: AllocationRequest, response: Response):
-    line = order_line_from_request(request)
     session = get_session()
     batches = SQLAlchemyRepository(session)
     try:
-        batchref = services.allocate(line, batches, session)
+        batchref = services.allocate(request.orderid,
+                                     request.sku,
+                                     request.qty, batches, session)
         response.status_code = status.HTTP_201_CREATED
         return {"batchref": batchref}
     except (models.OutOfStock, services.InvalidSku) as e:
@@ -41,12 +42,11 @@ def allocate(request: AllocationRequest, response: Response):
 
 @app.delete("/allocations")
 def deallocate(request: AllocationRequest, response: Response):
-    line = order_line_from_request(request)
     session = get_session()
     batches = SQLAlchemyRepository(session)
 
     try:
-        services.deallocate(line, batches, session)
+        services.deallocate(request.orderid, request.sku, request.qty, batches, session)
         response.status_code = HTTP_204_NO_CONTENT
         return {"message": "deleted"}
     except NoBatchContainingOrderLine as e:
