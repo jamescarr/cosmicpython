@@ -19,9 +19,12 @@ book. Each chapter has its own branch for pursual.
   - Git tag: [ch04](https://github.com/jamescarr/cosmicpython/tree/ch04)
 
 - **[Chapter 5: Service Layer](https://www.cosmicpython.com/book/chapter_05__high_gear_low_gear.html)**
-  - Status: *IN PROGRESS*
+  - Status: *DONE*
   - Git tag: [ch05](https://github.com/jamescarr/cosmicpython/tree/ch05)
 
+- **[Chapter 6: Unit of Work Pattern](https://www.cosmicpython.com/book/chapter_06_uow.html)**
+  - Status: *IN PROGRESS*
+  - Git tag: [ch06](https://github.com/jamescarr/cosmicpython/tree/ch06)
 
 ## Development
 There is a `Makefile` included with the targets listed when running the default
