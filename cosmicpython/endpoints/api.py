@@ -1,7 +1,10 @@
 from fastapi import FastAPI, Response, status
 from pydantic import BaseModel
 from starlette.status import HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
-from cosmicpython.adapters.repository import NoBatchContainingOrderLine, SQLAlchemyRepository
+from cosmicpython.adapters.repository import (
+    NoBatchContainingOrderLine,
+    SQLAlchemyRepository,
+)
 from cosmicpython import config
 from cosmicpython.domain import models
 from cosmicpython.service_layer import services
@@ -11,15 +14,16 @@ app = FastAPI(swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"})
 
 get_session = config.init_db()
 
+
 class AllocationRequest(BaseModel):
     orderid: str
     sku: str
     qty: int
 
+
 def order_line_from_request(req: AllocationRequest):
-    return models.OrderLine(
-        req.orderid, req.sku, req.qty
-    )
+    return models.OrderLine(req.orderid, req.sku, req.qty)
+
 
 @app.post("/allocations")
 def allocate(request: AllocationRequest, response: Response):
@@ -49,7 +53,7 @@ def deallocate(request: AllocationRequest, response: Response):
         response.status_code = HTTP_404_NOT_FOUND
         return {"message": str(e)}
 
+
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
-
