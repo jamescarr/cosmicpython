@@ -1,6 +1,7 @@
 from cosmicpython.domain.models import OrderLine, OutOfStock
 from cosmicpython.domain import models
 from cosmicpython.adapters.repository import AbstractRepository
+from cosmicpython.service_layer.unit_of_work import AbstractUnitOfWork
 
 
 def is_valid_sku(sku, batches):
@@ -8,32 +9,35 @@ def is_valid_sku(sku, batches):
 
 
 def allocate(
-    orderid: str, sku: str, qty: int, repo: AbstractRepository, session
+    orderid: str, sku: str, qty: int, uow: AbstractUnitOfWork
 ) -> str:
-    batches = repo.list()
-    if not is_valid_sku(sku, batches):
-        raise InvalidSku(sku)
+    with uow:
+        batches = uow.batches.list()
+        if not is_valid_sku(sku, batches): # we should push this into the repo
+            raise InvalidSku(sku)
 
-    batchref = models.allocate(OrderLine(orderid, sku, qty), batches)
-    session.commit()
-    return batchref
+        batchref = models.allocate(OrderLine(orderid, sku, qty), batches)
+        uow.commit()
+        return batchref
 
 
 def add_batch(
-    reference: str, sku: str, qty: int, eta, repo: AbstractRepository, session
+    reference: str, sku: str, qty: int, eta, uow: AbstractUnitOfWork
 ) -> models.Batch:
-    batch = models.Batch(reference, sku, qty, eta)
-    repo.add(batch)
-    session.commit()
-    return batch
+    with uow:
+        batch = models.Batch(reference, sku, qty, eta)
+        uow.batches.add(batch)
+        uow.commit()
+        return batch
 
 
-def deallocate(orderid: str, sku: str, qty: int, repo: AbstractRepository, session):
+def deallocate(orderid: str, sku: str, qty: int, uow: AbstractUnitOfWork):
     line = OrderLine(orderid, sku, qty)
-    batch = repo.find_containing_line(line)
-    if batch != None:
-        batch.deallocate(line)
-        session.commit()
+    with uow:
+        batch = uow.batches.find_containing_line(line)
+        if batch != None:
+            batch.deallocate(line)
+            uow.commit()
 
 
 class InvalidSku(Exception):

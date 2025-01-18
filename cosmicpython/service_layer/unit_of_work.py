@@ -1,4 +1,5 @@
 import abc
+from typing import AbstractSet
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -20,6 +21,9 @@ class AbstractUnitOfWork(abc.ABC):
     def rollback(self):  # (4)
         raise NotImplementedError
 
+    def __enter__(self):
+        return self
+
 
 DEFAULT_SESSION_FACTORY = sessionmaker(  # (1)
     bind=create_engine(
@@ -36,6 +40,8 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
     def __enter__(self):
         self.session = self.session_factory()
         self.batches = repository.SQLAlchemyRepository(self.session)
+        return super().__enter__()
+
 
     def __exit__(self, *args):
         super().__exit__(*args)
@@ -46,3 +52,14 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
 
     def rollback(self):
         return self.session.rollback()
+
+
+class FakeUnitOfWork(AbstractUnitOfWork):
+    def __init__(self) -> None:
+        self.batches = repository.FakeRepository([])
+
+    def commit(self):
+        self.committed = True
+
+    def rollback(self):
+        pass
