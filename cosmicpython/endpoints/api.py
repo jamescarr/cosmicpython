@@ -6,8 +6,6 @@ from starlette.status import (
     HTTP_201_CREATED,
     HTTP_204_NO_CONTENT,
     HTTP_404_NOT_FOUND,
-    HTTP_418_IM_A_TEAPOT,
-    HTTP_422_UNPROCESSABLE_ENTITY,
 )
 from cosmicpython.adapters.repository import (
     NoBatchContainingOrderLine,
@@ -16,6 +14,7 @@ from cosmicpython.adapters.repository import (
 from cosmicpython import config
 from cosmicpython.domain import models
 from cosmicpython.service_layer import services
+from cosmicpython.service_layer.unit_of_work import SqlAlchemyUnitOfWork
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"})
 
@@ -42,12 +41,10 @@ def order_line_from_request(req: AllocationRequest):
 
 @app.post("/add_batch", status_code=status.HTTP_201_CREATED)
 def add_batch(request: OrderRequest, response: Response):
-    session = get_session()
-    batches = SQLAlchemyRepository(session)
-
+    uow = SqlAlchemyUnitOfWork()
     try:
         services.add_batch(
-            request.ref, request.sku, request.qty, request.eta, batches, session
+            request.ref, request.sku, request.qty, request.eta, uow
         )
         return {"message": f"Batch added."}
     except Exception as e:
@@ -57,11 +54,10 @@ def add_batch(request: OrderRequest, response: Response):
 
 @app.post("/allocations")
 def allocate(request: AllocationRequest, response: Response):
-    session = get_session()
-    batches = SQLAlchemyRepository(session)
+    uow = SqlAlchemyUnitOfWork()
     try:
         batchref = services.allocate(
-            request.orderid, request.sku, request.qty, batches, session
+            request.orderid, request.sku, request.qty, uow
         )
         response.status_code = status.HTTP_201_CREATED
         return {"batchref": batchref}
@@ -72,12 +68,10 @@ def allocate(request: AllocationRequest, response: Response):
 
 @app.delete("/allocations")
 def deallocate(request: AllocationRequest, response: Response):
-    session = get_session()
-    batches = SQLAlchemyRepository(session)
-
+    uow = SqlAlchemyUnitOfWork()
     try:
         services.deallocate(
-            request.orderid, request.sku, request.qty, batches, session
+            request.orderid, request.sku, request.qty, uow
         )
         response.status_code = HTTP_204_NO_CONTENT
         return {"message": "deleted"}
