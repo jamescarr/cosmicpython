@@ -7,8 +7,9 @@ def is_valid_sku(sku, batches):
     return sku in {b.sku for b in batches}
 
 
-def allocate(orderid: str, sku: str, qty: int,
-             repo: AbstractRepository, session) -> str:
+def allocate(
+    orderid: str, sku: str, qty: int, repo: AbstractRepository, session
+) -> str:
     batches = repo.list()
     if not is_valid_sku(sku, batches):
         raise InvalidSku(sku)
@@ -27,9 +28,7 @@ def add_batch(
     return batch
 
 
-def deallocate(
-        orderid: str, sku: str, qty: int
-        , repo: AbstractRepository, session):
+def deallocate(orderid: str, sku: str, qty: int, repo: AbstractRepository, session):
     line = OrderLine(orderid, sku, qty)
     batch = repo.find_containing_line(line)
     if batch != None:

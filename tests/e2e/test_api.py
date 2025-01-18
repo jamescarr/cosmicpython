@@ -10,14 +10,14 @@ def add_stock_via_api(batches: list[tuple]):
     for ref, sku, qty, eta in batches:
         post_to_add_batch(ref, sku, qty, eta)
 
+
 def post_to_add_batch(ref, sku, qty, eta):
     url = config.get_api_url().url
-    r = requests.post(f"{url}/add_batch",
-                      json={"ref": ref,
-                            "sku": sku,
-                            "qty": qty,
-                            "eta": eta})
-    assert r.status_code== 201
+    r = requests.post(
+        f"{url}/add_batch", json={"ref": ref, "sku": sku, "qty": qty, "eta": eta}
+    )
+    assert r.status_code == 201
+
 
 @pytest.mark.usefixtures("restart_api")
 def test_api_returns_allocation():
@@ -25,7 +25,6 @@ def test_api_returns_allocation():
     earlybatch = random_batchref("1")
     laterbatch = random_batchref("2")
     otherbatch = random_batchref("3")
-
 
     add_stock_via_api(  # (2)
         [

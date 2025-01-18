@@ -15,8 +15,9 @@ def test_returns_allocation():
     repo, session = FakeRepository([]), FakeSession()
     services.add_batch("b1", "COMPLICATED-LAMP", 100, None, repo, session)
 
-    result = services.allocate("o1", "COMPLICATED-LAMP", 10,
-                               repo, FakeSession())  # (2) (3)
+    result = services.allocate(
+        "o1", "COMPLICATED-LAMP", 10, repo, FakeSession()
+    )  # (2) (3)
     assert result == "b1"
 
 

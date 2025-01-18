@@ -2,7 +2,13 @@ from datetime import date
 from typing import Optional
 from fastapi import FastAPI, Response, status
 from pydantic import BaseModel
-from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND, HTTP_418_IM_A_TEAPOT, HTTP_422_UNPROCESSABLE_ENTITY
+from starlette.status import (
+    HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
+    HTTP_404_NOT_FOUND,
+    HTTP_418_IM_A_TEAPOT,
+    HTTP_422_UNPROCESSABLE_ENTITY,
+)
 from cosmicpython.adapters.repository import (
     NoBatchContainingOrderLine,
     SQLAlchemyRepository,
@@ -23,6 +29,7 @@ class OrderRequest(BaseModel):
     qty: int
     eta: Optional[date]
 
+
 class AllocationRequest(BaseModel):
     orderid: str
     sku: str
@@ -32,26 +39,30 @@ class AllocationRequest(BaseModel):
 def order_line_from_request(req: AllocationRequest):
     return models.OrderLine(req.orderid, req.sku, req.qty)
 
+
 @app.post("/add_batch", status_code=status.HTTP_201_CREATED)
 def add_batch(request: OrderRequest, response: Response):
     session = get_session()
     batches = SQLAlchemyRepository(session)
 
     try:
-        services.add_batch(request.ref, request.sku, request.qty, request.eta, batches, session)
+        services.add_batch(
+            request.ref, request.sku, request.qty, request.eta, batches, session
+        )
         return {"message": f"Batch added."}
     except Exception as e:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"message": str(e)}
+
 
 @app.post("/allocations")
 def allocate(request: AllocationRequest, response: Response):
     session = get_session()
     batches = SQLAlchemyRepository(session)
     try:
-        batchref = services.allocate(request.orderid,
-                                     request.sku,
-                                     request.qty, batches, session)
+        batchref = services.allocate(
+            request.orderid, request.sku, request.qty, batches, session
+        )
         response.status_code = status.HTTP_201_CREATED
         return {"batchref": batchref}
     except (models.OutOfStock, services.InvalidSku) as e:
@@ -65,7 +76,9 @@ def deallocate(request: AllocationRequest, response: Response):
     batches = SQLAlchemyRepository(session)
 
     try:
-        services.deallocate(request.orderid, request.sku, request.qty, batches, session)
+        services.deallocate(
+            request.orderid, request.sku, request.qty, batches, session
+        )
         response.status_code = HTTP_204_NO_CONTENT
         return {"message": "deleted"}
     except NoBatchContainingOrderLine as e:
