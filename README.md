@@ -23,8 +23,12 @@ book. Each chapter has its own branch for pursual.
   - Git tag: [ch05](https://github.com/jamescarr/cosmicpython/tree/ch05)
 
 - **[Chapter 6: Unit of Work Pattern](https://www.cosmicpython.com/book/chapter_06_uow.html)**
-  - Status: *IN PROGRESS*
+  - Status: *DONE*
   - Git tag: [ch06](https://github.com/jamescarr/cosmicpython/tree/ch06)
+
+- **[Chapter 7: Aggregates and Consistency Boundaries](https://www.cosmicpython.com/book/chapter_07_aggregate.html)**
+  - Status: *IN PROGRESS*
+  - Git tag: [ch07](https://github.com/jamescarr/cosmicpython/tree/ch07)
 
 ## Development
 There is a `Makefile` included with the targets listed when running the default

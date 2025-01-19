@@ -43,9 +43,7 @@ def order_line_from_request(req: AllocationRequest):
 def add_batch(request: OrderRequest, response: Response):
     uow = SqlAlchemyUnitOfWork()
     try:
-        services.add_batch(
-            request.ref, request.sku, request.qty, request.eta, uow
-        )
+        services.add_batch(request.ref, request.sku, request.qty, request.eta, uow)
         return {"message": f"Batch added."}
     except Exception as e:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -56,9 +54,7 @@ def add_batch(request: OrderRequest, response: Response):
 def allocate(request: AllocationRequest, response: Response):
     uow = SqlAlchemyUnitOfWork()
     try:
-        batchref = services.allocate(
-            request.orderid, request.sku, request.qty, uow
-        )
+        batchref = services.allocate(request.orderid, request.sku, request.qty, uow)
         response.status_code = status.HTTP_201_CREATED
         return {"batchref": batchref}
     except (models.OutOfStock, services.InvalidSku) as e:
@@ -70,9 +66,7 @@ def allocate(request: AllocationRequest, response: Response):
 def deallocate(request: AllocationRequest, response: Response):
     uow = SqlAlchemyUnitOfWork()
     try:
-        services.deallocate(
-            request.orderid, request.sku, request.qty, uow
-        )
+        services.deallocate(request.orderid, request.sku, request.qty, uow)
         response.status_code = HTTP_204_NO_CONTENT
         return {"message": "deleted"}
     except NoBatchContainingOrderLine as e:

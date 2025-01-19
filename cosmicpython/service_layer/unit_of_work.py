@@ -1,4 +1,5 @@
 import abc
+from contextlib import contextmanager
 from typing import AbstractSet
 
 from sqlalchemy import create_engine
@@ -32,6 +33,27 @@ DEFAULT_SESSION_FACTORY = sessionmaker(  # (1)
 )
 
 
+@contextmanager
+def unit_of_work(session_factory=DEFAULT_SESSION_FACTORY):
+    """
+    Function based contextmanager that does the exact same behavior as the
+    below object version. This one has an implicit rather than explicit commit,
+    however.
+
+    Args:
+        session_factory (sessionmaker): factory for creating sessions
+    """
+    session = session_factory()
+    batches = repository.SQLAlchemyRepository(session)
+    try:
+        yield batches
+        session.commit()
+    except Exception:
+        session.rollback()
+    finally:
+        session.close()
+
+
 class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
     def __init__(self, session_factory=DEFAULT_SESSION_FACTORY) -> None:
         super().__init__()
@@ -41,7 +63,6 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         self.session = self.session_factory()
         self.batches = repository.SQLAlchemyRepository(self.session)
         return super().__enter__()
-
 
     def __exit__(self, *args):
         super().__exit__(*args)

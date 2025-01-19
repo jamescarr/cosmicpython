@@ -14,7 +14,7 @@ class FakeSession:
 
 def test_add_batch():
     uow = FakeUnitOfWork()
-    services.add_batch("b1", "CRUNCHY-ARMCHAIR", 100, None, uow)  #(3)
+    services.add_batch("b1", "CRUNCHY-ARMCHAIR", 100, None, uow)  # (3)
     assert uow.batches.get("b1") is not None
     assert uow.committed
 
@@ -23,9 +23,7 @@ def test_returns_allocation():
     uow = FakeUnitOfWork()
     services.add_batch("b1", "COMPLICATED-LAMP", 100, None, uow)
 
-    result = services.allocate(
-        "o1", "COMPLICATED-LAMP", 10, uow
-    )  # (2) (3)
+    result = services.allocate("o1", "COMPLICATED-LAMP", 10, uow)  # (2) (3)
     assert result == "b1"
 
 

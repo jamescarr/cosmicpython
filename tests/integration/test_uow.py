@@ -44,6 +44,7 @@ def test_uow_can_retrieve_a_batch_and_allocate_to_it(session_factory):
     batchref = get_allocated_batch_ref(session, "o1", "HIPSTER-WORKBENCH")
     assert batchref == "batch1"
 
+
 def test_rolls_back_uncommitted_work_by_default(session_factory):
     uow = unit_of_work.SqlAlchemyUnitOfWork(session_factory)
     with uow:

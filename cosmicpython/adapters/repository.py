@@ -9,7 +9,7 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, reference) -> Batch:
+    def get(self, reference=None, sku=None) -> Batch:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -29,8 +29,14 @@ class SQLAlchemyRepository(AbstractRepository):
     def add(self, batch: Batch):
         self._session.add(batch)
 
-    def get(self, reference) -> Batch:
-        return self._session.query(Batch).filter_by(reference=reference).first()
+    def get(self, reference=None, sku=None) -> Batch:
+        query = self._session.query(Batch)
+        if reference:
+            query = query.filter_by(reference=reference)
+        elif sku:
+            query = query.filter_by(sku=sku)
+
+        return query.first()
 
     def list(self) -> list[Batch]:
         return self._session.query(Batch).all()
