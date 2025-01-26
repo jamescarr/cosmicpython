@@ -121,3 +121,4 @@ dmypy.json
 .testmondata-shm
 .testmondata-wal
 .envrc
+api.log

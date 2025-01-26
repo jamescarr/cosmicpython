@@ -16,6 +16,9 @@ def post_to_add_batch(ref, sku, qty, eta):
     r = requests.post(
         f"{url}/add_batch", json={"ref": ref, "sku": sku, "qty": qty, "eta": eta}
     )
+    from pprint import pprint
+
+    pprint(r)
     assert r.status_code == 201
 
 
@@ -71,7 +74,7 @@ def test_allocations_are_persisted():
 
 
 @pytest.mark.usefixtures("restart_api")
-def test_allocations_can_be_allocationsd(repository):
+def test_allocations_can_be_deallocated(repository):
     sku = random_sku()
     batch1, batch2 = random_batchref("1"), random_batchref("2")
     order1 = random_orderid("1")
@@ -86,7 +89,9 @@ def test_allocations_can_be_allocationsd(repository):
     url = config.get_api_url().url
 
     # first order uses up all stock in batch 1
-    requests.post(f"{url}/allocations", json=line1)
+    r = requests.post(f"{url}/allocations", json=line1)
+    assert r.status_code == 201
+
     r = requests.delete(f"{url}/allocations", json=line1)
     assert r.status_code == 204
 

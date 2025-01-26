@@ -62,9 +62,12 @@ def restart_api():
     server_details = config.get_api_url()
 
     # Start the FastAPI server on some port, e.g. 8001
-    proc = subprocess.Popen(
-        ["uvicorn", ENTRYPOINT, "--port", server_details.port], stdout=subprocess.PIPE
-    )
+    with open("api.log", "a") as log_file:
+      proc = subprocess.Popen(
+          ["uvicorn", ENTRYPOINT, "--port", server_details.port],
+          stdout=log_file,
+          stderr=log_file
+      )
 
     # Optionally give it a moment to spin up
     time.sleep(1)

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 
 @dataclass(unsafe_hash=True)
@@ -56,6 +57,36 @@ def allocate(line: OrderLine, batches: list) -> str:
 
 
 class OutOfStock(Exception):
-    def __init__(self, line):
+    def __init__(self, line: OrderLine):
         super().__init__(f"Out of stock: {line.sku}")
         self.line = line
+
+
+class NoBatchContainingOrderLine(Exception):
+    def __init__(self, line: OrderLine):
+        super().__init__(f"No batch containing order {line.orderid}")
+        self.line = line
+
+
+class Product:
+    sku: str
+    batches: List[Batch]
+
+    def __init__(self, sku: str, batches: List[Batch]) -> None:
+        self.sku = sku
+        self.batches = batches
+
+    def deallocate(self, line: OrderLine):
+        for batch in self.batches:
+            if batch.contains(line):
+                batch.deallocate(line)
+                return
+        raise NoBatchContainingOrderLine(line)
+
+    def allocate(self, line: OrderLine) -> str:
+        try:
+            batch = next(b for b in sorted(self.batches) if b.can_allocate(line))
+            batch.allocate(line)
+            return batch.reference
+        except StopIteration:
+            raise OutOfStock(line)

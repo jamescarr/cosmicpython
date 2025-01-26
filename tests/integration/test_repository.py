@@ -1,6 +1,7 @@
 from sqlalchemy import text
 import pytest
 
+from cosmicpython import service_layer
 from cosmicpython.domain import models
 from cosmicpython.adapters import repository
 
@@ -57,6 +58,20 @@ def insert_allocation(session, orderline_id, batch_id):
         ),
         dict(orderline_id=orderline_id, batch_id=batch_id),
     )
+
+
+def test_product_loads_saved_products_by_sku(session):
+    products = repository.SqlAlchemyProductRepository(session)
+    p1 = models.Product(
+        sku="NOW-LISTEN",
+        batches=[models.Batch(reference="FOO", sku="BAR-BAZ", qty=10, eta=None)],
+    )
+
+    products.add(p1)
+
+    p2 = products.get(p1.sku)
+    assert p2.sku == p1.sku
+    assert p1.batches == p2.batches
 
 
 def test_fetch_batch_by_order_line(session):

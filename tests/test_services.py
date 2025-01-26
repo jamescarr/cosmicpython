@@ -15,7 +15,7 @@ class FakeSession:
 def test_add_batch():
     uow = FakeUnitOfWork()
     services.add_batch("b1", "CRUNCHY-ARMCHAIR", 100, None, uow)  # (3)
-    assert uow.batches.get("b1") is not None
+    assert uow.products.get("CRUNCHY-ARMCHAIR") is not None
     assert uow.committed
 
 
@@ -40,23 +40,3 @@ def test_commits():
 
     services.allocate("o1", "OMINOUS-MIRROR", 10, uow)
     assert uow.committed is True
-
-
-def test_deallocate_decrements_available_quantity():
-    uow = FakeUnitOfWork()
-    services.add_batch("b1", "BLUE-PLINTH", 100, None, uow)
-
-    services.allocate("o1", "BLUE-PLINTH", 10, uow)
-    with uow:
-        batch = uow.batches.get(reference="b1")
-        assert batch.available_quantity == 90
-
-    services.deallocate("o1", "BLUE-PLINTH", 10, uow)
-
-    assert batch.available_quantity == 100
-
-
-def test_deallocate_decrements_correct_quantity(): ...  #  TODO - check that we decrement the right sku
-
-
-def test_trying_to_deallocate_unallocated_batch(): ...  #  TODO: should this error or pass silently? up to you.

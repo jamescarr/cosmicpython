@@ -7,10 +7,6 @@ from starlette.status import (
     HTTP_204_NO_CONTENT,
     HTTP_404_NOT_FOUND,
 )
-from cosmicpython.adapters.repository import (
-    NoBatchContainingOrderLine,
-    SQLAlchemyRepository,
-)
 from cosmicpython import config
 from cosmicpython.domain import models
 from cosmicpython.service_layer import services
@@ -69,7 +65,7 @@ def deallocate(request: AllocationRequest, response: Response):
         services.deallocate(request.orderid, request.sku, request.qty, uow)
         response.status_code = HTTP_204_NO_CONTENT
         return {"message": "deleted"}
-    except NoBatchContainingOrderLine as e:
+    except models.NoBatchContainingOrderLine as e:
         response.status_code = HTTP_404_NOT_FOUND
         return {"message": str(e)}
 

@@ -1,6 +1,48 @@
 import abc
-from typing import Optional
-from cosmicpython.domain.models import Batch, OrderLine
+from typing import List, Optional
+from cosmicpython.domain.models import Batch, OrderLine, Product
+
+
+class AbstractProductRepository(abc.ABC):
+    @abc.abstractmethod
+    def add(self, product): ...
+
+    @abc.abstractmethod
+    def get(self, sku) -> Product: ...
+
+
+class SqlAlchemyProductRepository(AbstractProductRepository):
+    def __init__(self, session) -> None:
+        super().__init__()
+        self._session = session
+
+    def add(self, product):
+        self._session.add(product)
+
+    def get(self, sku) -> Product:
+        return self._session.query(Product).filter_by(sku=sku).first()
+
+
+class FakeProductRepository(AbstractProductRepository):
+    _products: set
+
+    def __init__(self, products) -> None:
+        self._products = set(products)
+        super().__init__()
+
+        for product in products:
+            self.add(product)
+
+    def add(self, product):
+        self._products.add(product)
+
+    def get(self, sku) -> Product:
+        return next((p for p in self._products if p.sku == sku), None)
+
+
+class ProductNotFoundForSku(Exception):
+    def __init__(self, sku) -> None:
+        super().__init__(f"No product found for sku {sku}")
 
 
 class AbstractRepository(abc.ABC):

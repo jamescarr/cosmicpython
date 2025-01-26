@@ -27,11 +27,17 @@ batches = Table(
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("reference", String(255)),
-    Column("sku", String(255)),
+    Column("sku", String(255), ForeignKey("products.sku")),
     Column("_purchased_quantity", Integer, nullable=False),
     Column("eta", Date, nullable=True),
 )
 
+products = Table(
+    "products",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("sku", String(255), unique=True, index=True),
+)
 allocations = Table(
     "allocations",
     metadata,
@@ -42,7 +48,7 @@ allocations = Table(
 
 
 def start_mappers():
-    lines_mapper = create_mapping(models.OrderLine, order_lines)
+    create_mapping(models.OrderLine, order_lines)
     create_mapping(
         models.Batch,
         batches,
@@ -53,5 +59,13 @@ def start_mappers():
                 secondary=allocations,
                 collection_class=set,
             )
+        },
+    )
+    create_mapping(
+        models.Product,
+        products,
+        properties={
+            # Relationship to all the batches that have this product's SKU
+            "batches": relationship(models.Batch, backref="product")
         },
     )

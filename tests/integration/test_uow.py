@@ -29,19 +29,30 @@ def insert_batch(session, ref, sku, qty, eta):
     )
 
 
+def insert_product_with_batch(sku, batch, session_factory):
+    uow = unit_of_work.SqlAlchemyUnitOfWork(session_factory)
+    with uow:
+        uow.products.add(model.Product(sku=sku, batches=[batch]))
+        uow.commit()
+
+
 def test_uow_can_retrieve_a_batch_and_allocate_to_it(session_factory):
     session = session_factory()
-    insert_batch(session, "batch1", "HIPSTER-WORKBENCH", 100, None)
+    sku = "HIPSTER-WORKBENCH"
+    insert_batch(session, "batch1", sku, 100, None)
+    insert_product_with_batch(
+        sku, model.Batch("batch1", sku, 100, None), session_factory
+    )
     session.commit()
 
     uow = unit_of_work.SqlAlchemyUnitOfWork(session_factory)  # (1)
     with uow:
-        batch = uow.batches.get(reference="batch1")  # (2)
-        line = model.OrderLine("o1", "HIPSTER-WORKBENCH", 10)
-        batch.allocate(line)
+        product = uow.products.get(sku=sku)  # (2)
+        line = model.OrderLine("o1", sku, 10)
+        product.allocate(line)
         uow.commit()  # (3)
 
-    batchref = get_allocated_batch_ref(session, "o1", "HIPSTER-WORKBENCH")
+    batchref = get_allocated_batch_ref(session, "o1", sku)
     assert batchref == "batch1"
 
 

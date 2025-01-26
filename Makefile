@@ -19,6 +19,7 @@ api-dev: install ## Runs the API Server
 
 clean:  ## Wipe out venv, docker, etc.
 	rm -rf .venv
+  rm api.log
 
 install:  ## install dependencies
 	uv pip install -r pyproject.toml

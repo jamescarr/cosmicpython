@@ -1,6 +1,11 @@
-from cosmicpython.domain.models import OrderLine, OutOfStock
+from typing import Optional
+import logging
+import pprint
+
+logging.basicConfig(level=logging.INFO)
+
+from cosmicpython.domain.models import OrderLine
 from cosmicpython.domain import models
-from cosmicpython.adapters.repository import AbstractRepository
 from cosmicpython.service_layer.unit_of_work import AbstractUnitOfWork, unit_of_work
 
 
@@ -8,23 +13,33 @@ def is_valid_sku(sku, batches):
     return sku in {b.sku for b in batches}
 
 
-def allocate(orderid: str, sku: str, qty: int, uow: AbstractUnitOfWork) -> str:
+def allocate(
+    orderid: str, sku: str, qty: int, uow: AbstractUnitOfWork
+) -> Optional[str]:
+    line = OrderLine(orderid=orderid, sku=sku, qty=qty)
+
     with uow:
-        batches = uow.batches.list()
-        if not is_valid_sku(sku, batches):  # we should push this into the repo
+        product = uow.products.get(sku=sku)
+        if product is None:
             raise InvalidSku(sku)
 
-        batchref = models.allocate(OrderLine(orderid, sku, qty), batches)
+        batchref = product.allocate(line)
         uow.commit()
         return batchref
 
 
 def add_batch(
     reference: str, sku: str, qty: int, eta, uow: AbstractUnitOfWork
-) -> models.Batch:
+) -> Optional[models.Batch]:
+
     with uow:
+        product = uow.products.get(sku=sku)
+        logging.info("Add batch structure:\n%s", pprint.pformat(product))
+        if product is None:
+            product = models.Product(sku, batches=[])
+            uow.products.add(product)
         batch = models.Batch(reference, sku, qty, eta)
-        uow.batches.add(batch)
+        product.batches.append(batch)
         uow.commit()
         return batch
 
@@ -32,13 +47,18 @@ def add_batch(
 def deallocate(orderid: str, sku: str, qty: int, uow: AbstractUnitOfWork):
     line = OrderLine(orderid, sku, qty)
     with uow:
-        batch = uow.batches.find_containing_line(line)
-        if batch != None:
-            batch.deallocate(line)
+        product = uow.products.get(sku=line.sku)
+        logging.info("Deallocate structure:\n%s", pprint.pformat([b._allocations for b in product.batches]))
+        logging.info(f"Line profivided: {line.orderid}")
+        try:
+            product.deallocate(line)
             uow.commit()
+        except models.NoBatchContainingOrderLine as e:
+            uow.rollback()
+            raise e
 
 
-def reallocate(line: OrderLine, uow: AbstractUnitOfWork) -> str:
+def reallocate(line: OrderLine, uow: AbstractUnitOfWork) -> Optional[str]:
     with unit_of_work() as batches:
         batch = batches.get(sku=line.sku)
         if batch is None:
