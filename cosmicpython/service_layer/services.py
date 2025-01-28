@@ -1,11 +1,11 @@
-from typing import Optional
 import logging
 import pprint
+from typing import Optional
 
 logging.basicConfig(level=logging.INFO)
 
-from cosmicpython.domain.models import OrderLine
 from cosmicpython.domain import models
+from cosmicpython.domain.models import OrderLine
 from cosmicpython.service_layer.unit_of_work import AbstractUnitOfWork, unit_of_work
 
 

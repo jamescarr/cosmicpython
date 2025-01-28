@@ -1,6 +1,5 @@
-from sqlalchemy import Table, Column, Integer, String, ForeignKey, Date
-from sqlalchemy.orm import registry, sessionmaker, clear_mappers, relationship
-
+from sqlalchemy import Column, Date, ForeignKey, Integer, String, Table
+from sqlalchemy.orm import clear_mappers, registry, relationship, sessionmaker
 
 from cosmicpython.domain import models
 

@@ -3,7 +3,7 @@ import requests
 
 from cosmicpython import config
 from cosmicpython.domain.models import OrderLine
-from tests.test_utils import random_sku, random_batchref, random_orderid
+from tests.test_utils import random_batchref, random_orderid, random_sku
 
 
 def add_stock_via_api(batches: list[tuple]):

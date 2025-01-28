@@ -1,5 +1,6 @@
 import pytest
 from sqlalchemy import text
+
 from cosmicpython.domain import models as model
 from cosmicpython.service_layer import unit_of_work
 

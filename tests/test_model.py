@@ -1,7 +1,9 @@
-import pytest
-from cosmicpython.domain.models import Batch, OrderLine, allocate, OutOfStock
 from datetime import date, timedelta
 from random import randint
+
+import pytest
+
+from cosmicpython.domain.models import Batch, OrderLine, OutOfStock, allocate
 
 today = date.today()
 tomorrow = today + timedelta(days=1)

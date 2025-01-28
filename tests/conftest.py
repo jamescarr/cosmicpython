@@ -1,20 +1,18 @@
-import pytest
-
-from sqlalchemy import create_engine
-from cosmicpython import config
-from cosmicpython.adapters.orm import (
-    mapper_registry,
-    sessionmaker,
-    clear_mappers,
-    metadata,
-)
-from cosmicpython.adapters.repository import AbstractRepository, SQLAlchemyRepository
-import pytest
 import subprocess
 import time
 
+import pytest
+from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
-from sqlalchemy import text
+
+from cosmicpython import config
+from cosmicpython.adapters.orm import (
+    clear_mappers,
+    mapper_registry,
+    metadata,
+    sessionmaker,
+)
+from cosmicpython.adapters.repository import AbstractRepository, SQLAlchemyRepository
 
 ENTRYPOINT = "cosmicpython.endpoints.api:app"
 

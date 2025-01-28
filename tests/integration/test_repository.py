@@ -1,9 +1,9 @@
-from sqlalchemy import text
 import pytest
+from sqlalchemy import text
 
 from cosmicpython import service_layer
-from cosmicpython.domain import models
 from cosmicpython.adapters import repository
+from cosmicpython.domain import models
 
 
 def test_repository_can_save_a_batch(session):

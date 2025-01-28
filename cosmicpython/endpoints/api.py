@@ -1,12 +1,10 @@
 from datetime import date
 from typing import Optional
+
 from fastapi import FastAPI, Response, status
 from pydantic import BaseModel
-from starlette.status import (
-    HTTP_201_CREATED,
-    HTTP_204_NO_CONTENT,
-    HTTP_404_NOT_FOUND,
-)
+from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
+
 from cosmicpython import config
 from cosmicpython.domain import models
 from cosmicpython.service_layer import services

@@ -1,5 +1,6 @@
 import abc
 from typing import List, Optional
+
 from cosmicpython.domain.models import Batch, OrderLine, Product
 
 
