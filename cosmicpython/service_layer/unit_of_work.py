@@ -11,22 +11,22 @@ from cosmicpython.adapters import repository
 class AbstractUnitOfWork(abc.ABC):
     products: repository.AbstractProductRepository
 
-    def __exit__(self, *args):  # (2)
-        self.rollback()  # (4)
+    def __exit__(self, *args):
+        self.rollback()
 
     @abc.abstractmethod
-    def commit(self):  # (3)
+    def commit(self):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def rollback(self):  # (4)
+    def rollback(self):
         raise NotImplementedError
 
     def __enter__(self):
         return self
 
 
-DEFAULT_SESSION_FACTORY = sessionmaker(  # (1)
+DEFAULT_SESSION_FACTORY = sessionmaker(
     bind=create_engine(
         config.get_postgres_uri(),
     )

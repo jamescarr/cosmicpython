@@ -5,11 +5,11 @@ from cosmicpython.service_layer import unit_of_work
 
 
 def get_allocated_batch_ref(session, orderid, sku):
-    [[orderlineid]] = session.execute(  # (1)
+    [[orderlineid]] = session.execute(
         text("SELECT id FROM order_lines WHERE orderid=:orderid AND sku=:sku"),
         dict(orderid=orderid, sku=sku),
     )
-    [[batchref]] = session.execute(  # (1)
+    [[batchref]] = session.execute(
         text(
             "SELECT b.reference FROM allocations JOIN batches AS b ON batch_id = b.id"
             " WHERE orderline_id=:orderlineid"
@@ -45,12 +45,12 @@ def test_uow_can_retrieve_a_batch_and_allocate_to_it(session_factory):
     )
     session.commit()
 
-    uow = unit_of_work.SqlAlchemyUnitOfWork(session_factory)  # (1)
+    uow = unit_of_work.SqlAlchemyUnitOfWork(session_factory)
     with uow:
-        product = uow.products.get(sku=sku)  # (2)
+        product = uow.products.get(sku=sku)
         line = model.OrderLine("o1", sku, 10)
         product.allocate(line)
-        uow.commit()  # (3)
+        uow.commit()
 
     batchref = get_allocated_batch_ref(session, "o1", sku)
     assert batchref == "batch1"

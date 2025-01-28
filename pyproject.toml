@@ -37,3 +37,7 @@ runner = "pytest"
 runner_args = []
 patterns = ["*.py"]
 ignore_patterns = []
+
+[tool.poetry.group.dev.dependencies]
+isort = "^6.0.0"
+

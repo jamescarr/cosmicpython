@@ -18,8 +18,7 @@ api-dev: install ## Runs the API Server
 	uv run fastapi dev cosmicpython/endpoints/api.py
 
 clean:  ## Wipe out venv, docker, etc.
-	rm -rf .venv
-  rm api.log
+	rm -rf .venv && rm api.log
 
 install:  ## install dependencies
 	uv pip install -r pyproject.toml

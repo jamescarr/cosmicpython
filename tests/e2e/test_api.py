@@ -24,12 +24,12 @@ def post_to_add_batch(ref, sku, qty, eta):
 
 @pytest.mark.usefixtures("restart_api")
 def test_api_returns_allocation():
-    sku, othersku = random_sku(), random_sku("other")  # (1)
+    sku, othersku = random_sku(), random_sku("other")
     earlybatch = random_batchref("1")
     laterbatch = random_batchref("2")
     otherbatch = random_batchref("3")
 
-    add_stock_via_api(  # (2)
+    add_stock_via_api(
         [
             (laterbatch, sku, 100, "2011-01-02"),
             (earlybatch, sku, 100, "2011-01-01"),
@@ -121,7 +121,7 @@ def test_404_message_for_no_order_to_allocations():
 
 
 @pytest.mark.usefixtures("restart_api")
-def test_400_message_for_out_of_stock():  # (1)
+def test_400_message_for_out_of_stock():
     sku, small_batch, large_order = random_sku(), random_batchref(), random_orderid()
     add_stock_via_api(
         [
@@ -136,7 +136,7 @@ def test_400_message_for_out_of_stock():  # (1)
 
 
 @pytest.mark.usefixtures("restart_api")
-def test_400_message_for_invalid_sku():  # (2)
+def test_400_message_for_invalid_sku():
     unknown_sku, orderid = random_sku(), random_orderid()
     data = {"orderid": orderid, "sku": unknown_sku, "qty": 20}
     url = config.get_api_url().url
