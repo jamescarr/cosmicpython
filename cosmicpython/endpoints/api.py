@@ -49,8 +49,13 @@ def allocate(request: AllocationRequest, response: Response):
     uow = SqlAlchemyUnitOfWork()
     try:
         batchref = services.allocate(request.orderid, request.sku, request.qty, uow)
-        response.status_code = status.HTTP_201_CREATED
-        return {"batchref": batchref}
+        if batchref:
+          response.status_code = status.HTTP_201_CREATED
+          return {"batchref": batchref}
+        else: # this is a bad hack... we should be able to respond based on event.
+          response.status_code = status.HTTP_400_BAD_REQUEST
+          return {"message": f"Out of stock: {request.sku}"}
+
     except (services.InvalidSku) as e:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": str(e)}
