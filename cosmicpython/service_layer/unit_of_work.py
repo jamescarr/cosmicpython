@@ -1,27 +1,38 @@
 import abc
 from contextlib import contextmanager
-from typing import AbstractSet
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from cosmicpython import config
 from cosmicpython.adapters import repository
+from cosmicpython.service_layer import message_bus
 
 
 class AbstractUnitOfWork(abc.ABC):
     products: repository.AbstractProductRepository
 
-    def __exit__(self, *args):
+    def __exit__(self, *_):
         self.rollback()
 
     @abc.abstractmethod
-    def commit(self):
+    def _commit(self):
         raise NotImplementedError
+
+    def commit(self):
+      self._commit()
+      self.publish_events()
 
     @abc.abstractmethod
     def rollback(self):
         raise NotImplementedError
+
+    def publish_events(self):
+      for product in self.products.seen:
+        print(dir(product))
+        while product.events:
+          event = product.events.pop(0)
+          message_bus.handle(event)
 
     def __enter__(self):
         return self
@@ -69,7 +80,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         super().__exit__(*args)
         self.session.close()
 
-    def commit(self):
+    def _commit(self):
         self.session.commit()
 
     def rollback(self):
@@ -80,7 +91,7 @@ class FakeUnitOfWork(AbstractUnitOfWork):
     def __init__(self, batches=[]) -> None:
         self.products = repository.FakeProductRepository(batches)
 
-    def commit(self):
+    def _commit(self):
         self.committed = True
 
     def rollback(self):

@@ -1,15 +1,27 @@
 import abc
-from typing import List, Optional
+from typing import Set, Optional
 
 from cosmicpython.domain.models import Batch, OrderLine, Product
 
 
 class AbstractProductRepository(abc.ABC):
+    def __init__(self):
+        self.seen = set()  # type: Set[Product]  #(1)
+
+    def add(self, product: Product):  #(2)
+        self._add(product)
+        self.seen.add(product)
+
+    def get(self, sku) -> Product:  #(3)
+        product = self._get(sku)
+        if product:
+            self.seen.add(product)
+        return product
     @abc.abstractmethod
-    def add(self, product): ...
+    def _add(self, product): ...
 
     @abc.abstractmethod
-    def get(self, sku) -> Product: ...
+    def _get(self, sku) -> Product: ...
 
 
 class SqlAlchemyProductRepository(AbstractProductRepository):
@@ -17,10 +29,10 @@ class SqlAlchemyProductRepository(AbstractProductRepository):
         super().__init__()
         self._session = session
 
-    def add(self, product):
+    def _add(self, product):
         self._session.add(product)
 
-    def get(self, sku) -> Product:
+    def _get(self, sku) -> Product:
         return self._session.query(Product).filter_by(sku=sku).first()
 
 
@@ -34,10 +46,10 @@ class FakeProductRepository(AbstractProductRepository):
         for product in products:
             self.add(product)
 
-    def add(self, product):
+    def _add(self, product):
         self._products.add(product)
 
-    def get(self, sku) -> Product:
+    def _get(self, sku) -> Product:
         return next((p for p in self._products if p.sku == sku), None)
 
 

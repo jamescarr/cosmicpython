@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Date, ForeignKey, Integer, String, Table
-from sqlalchemy.orm import clear_mappers, registry, relationship, sessionmaker
+from sqlalchemy.orm import clear_mappers, registry, relationship, sessionmaker, synonym
+from sqlalchemy.types import JSON
 
 from cosmicpython.domain import models
 
@@ -9,7 +10,6 @@ metadata = mapper_registry.metadata
 
 def create_mapping(model, table_definition, **kwargs):
     mapper_registry.map_imperatively(model, table_definition, **kwargs)
-
 
 order_lines = Table(
     "order_lines",
@@ -36,6 +36,8 @@ products = Table(
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("sku", String(255), unique=True, index=True),
+    Column("version", Integer),
+    Column("events", JSON, default=list)
 )
 allocations = Table(
     "allocations",
@@ -65,6 +67,6 @@ def start_mappers():
         products,
         properties={
             # Relationship to all the batches that have this product's SKU
-            "batches": relationship(models.Batch, backref="product")
+            "batches": relationship(models.Batch, backref="product"),
         },
     )

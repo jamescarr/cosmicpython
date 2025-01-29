@@ -51,7 +51,7 @@ def allocate(request: AllocationRequest, response: Response):
         batchref = services.allocate(request.orderid, request.sku, request.qty, uow)
         response.status_code = status.HTTP_201_CREATED
         return {"batchref": batchref}
-    except (models.OutOfStock, services.InvalidSku) as e:
+    except (services.InvalidSku) as e:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": str(e)}
 

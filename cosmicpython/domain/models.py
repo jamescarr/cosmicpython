@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import List
 
+from cosmicpython.domain import events
+from cosmicpython.domain.events import Event
+
 
 @dataclass(unsafe_hash=True)
 class OrderLine:
@@ -47,21 +50,6 @@ class Batch:
         return self.eta > other.eta
 
 
-def allocate(line: OrderLine, batches: list) -> str:
-    try:
-        batch = next(b for b in sorted(batches) if b.can_allocate(line))
-        batch.allocate(line)
-        return batch.reference
-    except StopIteration:
-        raise OutOfStock(line)
-
-
-class OutOfStock(Exception):
-    def __init__(self, line: OrderLine):
-        super().__init__(f"Out of stock: {line.sku}")
-        self.line = line
-
-
 class NoBatchContainingOrderLine(Exception):
     def __init__(self, line: OrderLine):
         super().__init__(f"No batch containing order {line.orderid}")
@@ -71,10 +59,13 @@ class NoBatchContainingOrderLine(Exception):
 class Product:
     sku: str
     batches: List[Batch]
+    events: List[Event]
 
-    def __init__(self, sku: str, batches: List[Batch]) -> None:
+    def __init__(self, sku: str, batches: List[Batch], version=0) -> None:
         self.sku = sku
         self.batches = batches
+        self.version = version
+        self.events = []
 
     def deallocate(self, line: OrderLine):
         for batch in self.batches:
@@ -83,10 +74,11 @@ class Product:
                 return
         raise NoBatchContainingOrderLine(line)
 
-    def allocate(self, line: OrderLine) -> str:
+    def allocate(self, line: OrderLine) -> str | None:
         try:
             batch = next(b for b in sorted(self.batches) if b.can_allocate(line))
             batch.allocate(line)
             return batch.reference
         except StopIteration:
-            raise OutOfStock(line)
+            self.events.append(events.OutOfStock(line.sku))
+            return None
