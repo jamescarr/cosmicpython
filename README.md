@@ -27,7 +27,7 @@ book. Each chapter has its own branch for pursual.
   - Git tag: [ch06](https://github.com/jamescarr/cosmicpython/tree/ch06)
 
 - **[Chapter 7: Aggregates and Consistency Boundaries](https://www.cosmicpython.com/book/chapter_07_aggregate.html)**
-  - Status: *IN PROGRESS*
+  - Status: *DONE*
   - Git tag: [ch07](https://github.com/jamescarr/cosmicpython/tree/ch07)
 
 ## Development
