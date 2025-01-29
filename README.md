@@ -31,7 +31,7 @@ book. Each chapter has its own branch for pursual.
   - Git tag: [ch07](https://github.com/jamescarr/cosmicpython/tree/ch07)
 
 - **[Chapter 8: Events and the Message Bus](https://www.cosmicpython.com/book/chapter_08_events_and_message_bus.html)**
-  - Status: **IN PROGRESS*
+  - Status: **DONE*
   - Git tag: [ch08](https://github.com/jamescarr/cosmicpython/tree/ch08)
 
 
