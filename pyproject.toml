@@ -40,4 +40,5 @@ ignore_patterns = []
 
 [tool.poetry.group.dev.dependencies]
 isort = "^6.0.0"
+pycycle = "^0.0.8"
 

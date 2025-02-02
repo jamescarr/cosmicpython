@@ -49,6 +49,9 @@ class Batch:
             return True
         return self.eta > other.eta
 
+    def deallocate_one(self) -> OrderLine:
+        return self._allocations.pop()
+
 
 class NoBatchContainingOrderLine(Exception):
     def __init__(self, line: OrderLine):
@@ -82,3 +85,12 @@ class Product:
         except StopIteration:
             self.events.append(events.OutOfStock(line.sku))
             return None
+
+    def change_batch_quantity(self, ref: str, qty: int):
+        batch = next(b for b in self.batches if b.reference == ref)
+        batch._purchased_quantity = qty
+        while batch.available_quantity < 0:
+            line = batch.deallocate_one()
+            self.events.append(
+                events.AllocationRequired(line.orderid, line.sku, line.qty)
+            )

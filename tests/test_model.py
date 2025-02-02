@@ -73,7 +73,6 @@ def test_prefers_current_stock_batches_to_shipments():
     shipment_batch = Batch("shipment-batch", "RETRO-CLOCK", 100, eta=tomorrow)
     product = Product(sku="RETRO-CLOCK", batches=[in_stock_batch, shipment_batch])
 
-
     line = OrderLine("oref", "RETRO-CLOCK", 10)
     product.allocate(line)
 

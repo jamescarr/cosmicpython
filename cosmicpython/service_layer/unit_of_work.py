@@ -6,7 +6,6 @@ from sqlalchemy.orm import sessionmaker
 
 from cosmicpython import config
 from cosmicpython.adapters import repository
-from cosmicpython.service_layer import message_bus
 
 
 class AbstractUnitOfWork(abc.ABC):
@@ -20,19 +19,16 @@ class AbstractUnitOfWork(abc.ABC):
         raise NotImplementedError
 
     def commit(self):
-      self._commit()
-      self.publish_events()
+        self._commit()
+
+    def collect_new_events(self):
+        for product in self.products.seen:
+            while product.events:
+                yield product.events.pop(0)
 
     @abc.abstractmethod
     def rollback(self):
         raise NotImplementedError
-
-    def publish_events(self):
-      for product in self.products.seen:
-        print(dir(product))
-        while product.events:
-          event = product.events.pop(0)
-          message_bus.handle(event)
 
     def __enter__(self):
         return self

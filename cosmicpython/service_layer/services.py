@@ -6,8 +6,9 @@ logging.basicConfig(level=logging.INFO)
 
 from cosmicpython.domain import models
 from cosmicpython.domain.models import OrderLine
-from cosmicpython.service_layer.unit_of_work import AbstractUnitOfWork, unit_of_work
 from cosmicpython.service_layer import message_bus
+from cosmicpython.service_layer.unit_of_work import AbstractUnitOfWork, unit_of_work
+
 
 def is_valid_sku(sku, batches):
     return sku in {b.sku for b in batches}
