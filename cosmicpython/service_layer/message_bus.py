@@ -25,3 +25,7 @@ class MessageBus(AbstractMessageBus):
       events.AllocationRequired: [handlers.allocate],
       events.BatchQuantityChanged: [handlers.change_batch_quantity],
   }
+
+
+def handle(event: events.Event, uow: AbstractUnitOfWork):
+  MessageBus().handle(event, uow)

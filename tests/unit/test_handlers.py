@@ -1,7 +1,9 @@
 from datetime import date
+from typing import List
+from collections import defaultdict
 
 from cosmicpython.domain import events
-from cosmicpython.service_layer.message_bus import MessageBus
+from cosmicpython.service_layer.message_bus import MessageBus, AbstractMessageBus
 from cosmicpython.service_layer.unit_of_work import FakeUnitOfWork
 
 message_bus = MessageBus()
@@ -61,3 +63,41 @@ class TestChangeBatchQuantity:
         assert batch1.available_quantity == 5  # (2)
         # and 20 will be reallocated to the next batch
         assert batch2.available_quantity == 30  # (2)
+
+    def test_reallocates_if_necessary_isolated(self):
+        uow = FakeUnitOfWorkWithFakeMessageBus()
+
+        # test setup as before
+        event_history = [
+            events.BatchCreated("batch1", "INDIFFERENT-TABLE", 50, None),
+            events.BatchCreated("batch2", "INDIFFERENT-TABLE", 50, date.today()),
+            events.AllocationRequired("order1", "INDIFFERENT-TABLE", 20),
+            events.AllocationRequired("order2", "INDIFFERENT-TABLE", 20),
+        ]
+        for e in event_history:
+            message_bus.handle(e, uow)
+
+        [batch1, batch2] = uow.products.get(sku="INDIFFERENT-TABLE").batches
+        assert batch1.available_quantity == 10
+        assert batch2.available_quantity == 50
+
+        message_bus.handle(events.BatchQuantityChanged("batch1", 25), uow)
+
+        # assert on new events emitted rather than downstream side-effects
+        [reallocation_event] = uow.events_published
+        assert isinstance(reallocation_event, events.AllocationRequired)
+        assert reallocation_event.orderid in {"order1", "order2"}
+        assert reallocation_event.sku == "INDIFFERENT-TABLE"
+
+
+class FakeUnitOfWorkWithFakeMessageBus(FakeUnitOfWork):
+    def __init__(self):
+        super().__init__()
+        self.events_published = []  # type: List[events.Event]
+
+    def collect_new_events(self):
+        for product in self.products.seen:
+            while product.events:
+                event = product.events.pop(0)
+                self.events_published.append(event)
+                yield event
