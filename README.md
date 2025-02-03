@@ -34,6 +34,9 @@ book. Each chapter has its own branch for pursual.
   - Status: **DONE*
   - Git tag: [ch08](https://github.com/jamescarr/cosmicpython/tree/ch08)
 
+- **[Chapter 9: Going to Town on the Message Bus](https://www.cosmicpython.com/book/chapter_09_all_messagebus.html)
+  - Status: **DONE*
+  - Git tag: [ch09](https://github.com/jamescarr/cosmicpython/tree/ch09)
 
 ## Development
 There is a `Makefile` included with the targets listed when running the default
