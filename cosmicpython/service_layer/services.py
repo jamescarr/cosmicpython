@@ -24,4 +24,3 @@ def deallocate(orderid: str, sku: str, qty: int, uow: AbstractUnitOfWork):
         except models.NoBatchContainingOrderLine as e:
             uow.rollback()
             raise e
-

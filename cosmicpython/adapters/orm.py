@@ -77,6 +77,7 @@ def start_mappers():
         },
     )
 
+
 @event.listens_for(models.Product, "load")
 def receive_load(product, _):
     product.events = []

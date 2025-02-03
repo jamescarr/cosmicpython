@@ -2,9 +2,8 @@ import logging
 import pprint
 
 from cosmicpython.domain import events, models
-from cosmicpython.domain.models import OrderLine, InvalidSku
+from cosmicpython.domain.models import InvalidSku, OrderLine
 from cosmicpython.service_layer import unit_of_work
-
 
 
 def add_batch(
@@ -12,17 +11,16 @@ def add_batch(
     uow: unit_of_work.AbstractUnitOfWork,
 ):
 
-    print(f"Batch created with ref: {event.ref}, SKU: {event.sku}, Quantity: {event.qty}, ETA: {event.eta}")
+    print(
+        f"Batch created with ref: {event.ref}, SKU: {event.sku}, Quantity: {event.qty}, ETA: {event.eta}"
+    )
     with uow:
         product = uow.products.get(sku=event.sku)
         if product is None:
             product = models.Product(event.sku, batches=[])
             uow.products.add(product)
         logging.info("Add batch structure:\n%s", pprint.pformat(product))
-        batch = models.Batch(event.ref,
-                             event.sku,
-                             event.qty,
-                             event.eta)
+        batch = models.Batch(event.ref, event.sku, event.qty, event.eta)
         product.batches.append(batch)
         uow.commit()
         return batch

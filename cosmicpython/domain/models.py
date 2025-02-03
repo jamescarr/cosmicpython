@@ -9,6 +9,7 @@ class InvalidSku(Exception):
     def __init__(self, sku: str) -> None:
         super().__init__(f"Invalid sku {sku}")
 
+
 @dataclass(unsafe_hash=True)
 class OrderLine:
     orderid: str

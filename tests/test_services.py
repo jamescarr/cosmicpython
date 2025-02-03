@@ -6,6 +6,7 @@ from cosmicpython.service_layer.unit_of_work import FakeUnitOfWork
 
 message_bus = MessageBus()
 
+
 class FakeSession:
     committed = False
 

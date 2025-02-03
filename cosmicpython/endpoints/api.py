@@ -6,10 +6,10 @@ from pydantic import BaseModel
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
 
 from cosmicpython import config
-from cosmicpython.domain import models, events
+from cosmicpython.domain import events, models
 from cosmicpython.service_layer import handlers, services
-from cosmicpython.service_layer.unit_of_work import SqlAlchemyUnitOfWork
 from cosmicpython.service_layer.message_bus import MessageBus
+from cosmicpython.service_layer.unit_of_work import SqlAlchemyUnitOfWork
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"})
 message_bus = MessageBus()
@@ -38,12 +38,12 @@ def order_line_from_request(req: AllocationRequest):
 def add_batch(request: OrderRequest, response: Response):
     uow = SqlAlchemyUnitOfWork()
     try:
-        message_bus.handle(events.BatchCreated(
-                       ref=request.ref,
-                       sku=request.sku,
-                       qty=request.qty,
-                       eta=request.eta),
-                       uow=uow)
+        message_bus.handle(
+            events.BatchCreated(
+                ref=request.ref, sku=request.sku, qty=request.qty, eta=request.eta
+            ),
+            uow=uow,
+        )
         return {"message": f"Batch added."}
     except Exception as e:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -54,13 +54,13 @@ def add_batch(request: OrderRequest, response: Response):
 def allocate(request: AllocationRequest, response: Response):
     uow = SqlAlchemyUnitOfWork()
     try:
-        result = message_bus.handle(events.AllocationRequired(
-         request.orderid, request.sku, request.qty
-        ), uow)
+        result = message_bus.handle(
+            events.AllocationRequired(request.orderid, request.sku, request.qty), uow
+        )
         batchref = result.pop()
         if not batchref:
-          response.status_code = status.HTTP_400_BAD_REQUEST
-          return {"message": f"Out of stock: {request.sku}"}
+            response.status_code = status.HTTP_400_BAD_REQUEST
+            return {"message": f"Out of stock: {request.sku}"}
     except handlers.InvalidSku as e:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": str(e)}
