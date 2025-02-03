@@ -2,12 +2,9 @@ import logging
 import pprint
 
 from cosmicpython.domain import events, models
-from cosmicpython.domain.models import OrderLine
+from cosmicpython.domain.models import OrderLine, InvalidSku
 from cosmicpython.service_layer import unit_of_work
 
-class InvalidSku(Exception):
-    def __init__(self, sku: str) -> None:
-        super().__init__(f"Invalid sku {sku}")
 
 
 def add_batch(

@@ -9,25 +9,6 @@ from cosmicpython.domain.models import OrderLine
 from cosmicpython.service_layer.unit_of_work import AbstractUnitOfWork, unit_of_work
 
 
-def is_valid_sku(sku, batches):
-    return sku in {b.sku for b in batches}
-
-
-def allocate(
-    orderid: str, sku: str, qty: int, uow: AbstractUnitOfWork
-) -> Optional[str]:
-    line = OrderLine(orderid=orderid, sku=sku, qty=qty)
-
-    with uow:
-        product = uow.products.get(sku=sku)
-        if product is None:
-            raise InvalidSku(sku)
-
-        batchref = product.allocate(line)
-        uow.commit()
-        return batchref
-
-
 def deallocate(orderid: str, sku: str, qty: int, uow: AbstractUnitOfWork):
     line = OrderLine(orderid, sku, qty)
     with uow:
@@ -44,17 +25,3 @@ def deallocate(orderid: str, sku: str, qty: int, uow: AbstractUnitOfWork):
             uow.rollback()
             raise e
 
-
-def reallocate(line: OrderLine, uow: AbstractUnitOfWork) -> Optional[str]:
-    with unit_of_work() as batches:
-        batch = batches.get(sku=line.sku)
-        if batch is None:
-            raise InvalidSku(f"Invalid sku {line.sku}")
-        batch.deallocate(line)
-        result = allocate(line.orderid, line.sku, line.qty, uow)
-        return result
-
-
-class InvalidSku(Exception):
-    def __init__(self, sku: str) -> None:
-        super().__init__(f"Invalid sku {sku}")

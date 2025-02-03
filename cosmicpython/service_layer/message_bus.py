@@ -14,15 +14,8 @@ def handle(event: events.Event, uow: AbstractUnitOfWork):
     return results
 
 
-def send_out_of_stock_notification(event: events.OutOfStock):
-    print(
-        "stock@made.com",
-        f"Out of stock for {event.sku}",
-    )
-
-
 HANDLERS = {
-    events.OutOfStock: [send_out_of_stock_notification],
+    events.OutOfStock: [handlers.send_out_of_stock_notification],
     events.BatchCreated: [handlers.add_batch],
     events.AllocationRequired: [handlers.allocate],
     events.BatchQuantityChanged: [handlers.change_batch_quantity],

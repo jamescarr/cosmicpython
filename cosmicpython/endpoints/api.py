@@ -7,7 +7,7 @@ from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_404_NOT
 
 from cosmicpython import config
 from cosmicpython.domain import models, events
-from cosmicpython.service_layer import services
+from cosmicpython.service_layer import handlers, services
 from cosmicpython.service_layer.unit_of_work import SqlAlchemyUnitOfWork
 from cosmicpython.service_layer import message_bus
 
@@ -36,7 +36,7 @@ def order_line_from_request(req: AllocationRequest):
 
 @app.post("/add_batch", status_code=status.HTTP_201_CREATED)
 def add_batch(request: OrderRequest, response: Response):
-    uow = SqlAlchemyUnitOfWork(session_factory=get_session)
+    uow = SqlAlchemyUnitOfWork()
     try:
         message_bus.handle(events.BatchCreated(
                        ref=request.ref,
@@ -54,17 +54,19 @@ def add_batch(request: OrderRequest, response: Response):
 def allocate(request: AllocationRequest, response: Response):
     uow = SqlAlchemyUnitOfWork()
     try:
-        batchref = services.allocate(request.orderid, request.sku, request.qty, uow)
-        if batchref:
-            response.status_code = status.HTTP_201_CREATED
-            return {"batchref": batchref}
-        else:  # this is a bad hack... we should be able to respond based on event.
-            response.status_code = status.HTTP_400_BAD_REQUEST
-            return {"message": f"Out of stock: {request.sku}"}
-
-    except services.InvalidSku as e:
+        result = message_bus.handle(events.AllocationRequired(
+         request.orderid, request.sku, request.qty
+        ), uow)
+        batchref = result.pop()
+        if not batchref:
+          response.status_code = status.HTTP_400_BAD_REQUEST
+          return {"message": f"Out of stock: {request.sku}"}
+    except handlers.InvalidSku as e:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": str(e)}
+
+    response.status_code = status.HTTP_201_CREATED
+    return {"batchref": batchref}
 
 
 @app.delete("/allocations")
