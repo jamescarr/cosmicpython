@@ -1,9 +1,10 @@
 from datetime import date
 
 from cosmicpython.domain import events
-from cosmicpython.service_layer import message_bus
+from cosmicpython.service_layer.message_bus import MessageBus
 from cosmicpython.service_layer.unit_of_work import FakeUnitOfWork
 
+message_bus = MessageBus()
 
 class TestAddBatch:
     def test_for_new_product(self):

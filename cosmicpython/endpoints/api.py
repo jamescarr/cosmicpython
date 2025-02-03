@@ -9,10 +9,10 @@ from cosmicpython import config
 from cosmicpython.domain import models, events
 from cosmicpython.service_layer import handlers, services
 from cosmicpython.service_layer.unit_of_work import SqlAlchemyUnitOfWork
-from cosmicpython.service_layer import message_bus
+from cosmicpython.service_layer.message_bus import MessageBus
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"})
-
+message_bus = MessageBus()
 
 get_session = config.init_db()
 

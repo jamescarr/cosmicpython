@@ -1,9 +1,10 @@
 import pytest
 
 from cosmicpython.domain import events, models
-from cosmicpython.service_layer import message_bus, services
+from cosmicpython.service_layer.message_bus import MessageBus
 from cosmicpython.service_layer.unit_of_work import FakeUnitOfWork
 
+message_bus = MessageBus()
 
 class FakeSession:
     committed = False
