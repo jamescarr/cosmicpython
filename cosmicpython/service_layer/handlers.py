@@ -1,11 +1,9 @@
 import logging
+import pprint
 
 from cosmicpython.domain import events, models
 from cosmicpython.domain.models import OrderLine
 from cosmicpython.service_layer import unit_of_work
-
-logging.basicConfig(level=logging.INFO)
-
 
 class InvalidSku(Exception):
     def __init__(self, sku: str) -> None:
@@ -16,12 +14,18 @@ def add_batch(
     event: events.BatchCreated,
     uow: unit_of_work.AbstractUnitOfWork,
 ):
+
+    print(f"Batch created with ref: {event.ref}, SKU: {event.sku}, Quantity: {event.qty}, ETA: {event.eta}")
     with uow:
         product = uow.products.get(sku=event.sku)
         if product is None:
             product = models.Product(event.sku, batches=[])
             uow.products.add(product)
-        batch = models.Batch(event.ref, event.sku, event.qty, event.eta)
+        logging.info("Add batch structure:\n%s", pprint.pformat(product))
+        batch = models.Batch(event.ref,
+                             event.sku,
+                             event.qty,
+                             event.eta)
         product.batches.append(batch)
         uow.commit()
         return batch

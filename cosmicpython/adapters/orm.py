@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Date, ForeignKey, Integer, String, Table
+from sqlalchemy import Column, Date, ForeignKey, Integer, String, Table, event
 from sqlalchemy.orm import (
     clear_mappers,
     registry,
@@ -43,8 +43,7 @@ products = Table(
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("sku", String(255), unique=True, index=True),
-    Column("version", Integer),
-    Column("events", JSON, default=list),
+    Column("version", Integer, nullable=False, server_default="0"),
 )
 allocations = Table(
     "allocations",
@@ -77,3 +76,7 @@ def start_mappers():
             "batches": relationship(models.Batch, backref="product"),
         },
     )
+
+@event.listens_for(models.Product, "load")
+def receive_load(product, _):
+    product.events = []

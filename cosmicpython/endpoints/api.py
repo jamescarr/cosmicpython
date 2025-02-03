@@ -6,9 +6,10 @@ from pydantic import BaseModel
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
 
 from cosmicpython import config
-from cosmicpython.domain import models
+from cosmicpython.domain import models, events
 from cosmicpython.service_layer import services
 from cosmicpython.service_layer.unit_of_work import SqlAlchemyUnitOfWork
+from cosmicpython.service_layer import message_bus
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"})
 
@@ -35,9 +36,14 @@ def order_line_from_request(req: AllocationRequest):
 
 @app.post("/add_batch", status_code=status.HTTP_201_CREATED)
 def add_batch(request: OrderRequest, response: Response):
-    uow = SqlAlchemyUnitOfWork()
+    uow = SqlAlchemyUnitOfWork(session_factory=get_session)
     try:
-        services.add_batch(request.ref, request.sku, request.qty, request.eta, uow)
+        message_bus.handle(events.BatchCreated(
+                       ref=request.ref,
+                       sku=request.sku,
+                       qty=request.qty,
+                       eta=request.eta),
+                       uow=uow)
         return {"message": f"Batch added."}
     except Exception as e:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR

@@ -1,5 +1,5 @@
 from cosmicpython.domain import events
-from cosmicpython.service_layer import handlers
+from cosmicpython.service_layer import handlers, services
 from cosmicpython.service_layer.unit_of_work import AbstractUnitOfWork
 
 

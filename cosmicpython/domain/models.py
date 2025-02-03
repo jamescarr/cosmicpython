@@ -80,6 +80,7 @@ class Product:
     def allocate(self, line: OrderLine) -> str | None:
         try:
             batch = next(b for b in sorted(self.batches) if b.can_allocate(line))
+            self.version += 1
             batch.allocate(line)
             return batch.reference
         except StopIteration:

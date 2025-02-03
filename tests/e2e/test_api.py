@@ -18,7 +18,7 @@ def post_to_add_batch(ref, sku, qty, eta):
     )
     from pprint import pprint
 
-    pprint(r)
+    pprint(r.json())
     assert r.status_code == 201
 
 

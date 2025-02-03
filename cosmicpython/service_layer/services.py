@@ -4,9 +4,8 @@ from typing import Optional
 
 logging.basicConfig(level=logging.INFO)
 
-from cosmicpython.domain import models
+from cosmicpython.domain import events, models
 from cosmicpython.domain.models import OrderLine
-from cosmicpython.service_layer import message_bus
 from cosmicpython.service_layer.unit_of_work import AbstractUnitOfWork, unit_of_work
 
 
@@ -27,22 +26,6 @@ def allocate(
         batchref = product.allocate(line)
         uow.commit()
         return batchref
-
-
-def add_batch(
-    reference: str, sku: str, qty: int, eta, uow: AbstractUnitOfWork
-) -> Optional[models.Batch]:
-
-    with uow:
-        product = uow.products.get(sku=sku)
-        logging.info("Add batch structure:\n%s", pprint.pformat(product))
-        if product is None:
-            product = models.Product(sku, batches=[])
-            uow.products.add(product)
-        batch = models.Batch(reference, sku, qty, eta)
-        product.batches.append(batch)
-        uow.commit()
-        return batch
 
 
 def deallocate(orderid: str, sku: str, qty: int, uow: AbstractUnitOfWork):
